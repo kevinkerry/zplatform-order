@@ -23,63 +23,31 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
  */
 public interface TxnsOrderinfoDAO extends BaseDAO<PojoTxnsOrderinfo>{
 
-    /**
-     * 
-     * @param orderNo
-     * @param merchId
-     */
-    public void updateOrderToFail(String orderNo,String merchId);
+	/**
+	 * 保存订单信息
+	 * @param orderinfo
+	 */
+    public void saveOrderInfo(PojoTxnsOrderinfo orderinfo);
     
     /**
-     * 
-     * @param orderNo
-     * @param merchId
+     * 通过交易序列号获取订单信息
+     * @param txnseqno
      * @return
      */
-    public PojoTxnsOrderinfo getOrderinfoByOrderNo(String orderNo,String merchId);
-    /**
-     * 
-     * @param orderinfo
-     */
-    public void updateOrderinfo(PojoTxnsOrderinfo orderinfo);
+    public PojoTxnsOrderinfo getOrderinfoByTxnseqno(String txnseqno);
     
     /**
-     * 
+     * 通过订单号和商户号获取订单信息
      * @param orderNo
-     * @param merchId
+     * @param merchNo
      * @return
      */
-    public PojoTxnsOrderinfo getOrderinfoByOrderNoAndMemberId(String orderNo,String merchId);
+    public PojoTxnsOrderinfo getOrderinfoByOrderNoAndMerchNo(String orderNo,String merchNo);
     
     /**
-     * 
+     * 通过TN获取订单信息
      * @param tn
      * @return
      */
-    public PojoTxnsOrderinfo getOrderByTN(String tn);
-    
-    /**
-     * 
-     * @param txnseqno
-     * @return
-     */
-    public PojoTxnsOrderinfo getOrderByTxnseqno(String txnseqno);
-    
-    /**
-     * 
-     * @param txnseqno
-     */
-    public void updateOrderToFail(String txnseqno);
-    
-    /**
-     * 
-     * @param txnseqno
-     */
-    public void updateOrderToSuccess(String txnseqno) ;
-    
-    /**
-     * 
-     * @param tn
-     */
-    public void updateOrderToSuccessByTN(String tn) ;
+    public PojoTxnsOrderinfo getOrderinfoByTN(String tn);
 }

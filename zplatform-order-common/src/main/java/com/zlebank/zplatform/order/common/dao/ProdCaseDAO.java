@@ -23,4 +23,5 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoProdCase;
  */
 public interface ProdCaseDAO extends BaseDAO<PojoProdCase>{
    
+	public PojoProdCase getMerchProd(String prdtver,String busicode);
 }

@@ -11,6 +11,9 @@
 package com.zlebank.zplatform.order.service;
 
 import com.zlebank.zplatform.order.common.bean.OrderBean;
+import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
+import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 
 /**
@@ -34,14 +37,10 @@ public interface CommonOrderService {
 	
 	/**
 	 * 校验订单的唯一性
-	 * @param orderNo
-	 * @param txntime
-	 * @param amount
-	 * @param merchId
-	 * @param memberId
+	 * @param orderinfo
 	 * @throws CommonException
 	 */
-	public void verifyRepeatOrder(String orderNo, String txntime,String amount, String merchId, String memberId) throws CommonException;
+	public void verifyRepeatOrder(OrderBean orderBean) throws CommonException;
 	
 	
 	/**
@@ -74,4 +73,24 @@ public interface CommonOrderService {
      * @throws CommonException
      */
     public void checkBusiAcct(String merchant,String memberId) throws CommonException;
+    
+    /**
+     * 通过订单号和商户号获取订单信息
+     * @param orderNo
+     * @param merchNo
+     * @return
+     */
+    public OrderInfoBean getOrderinfoByOrderNoAndMerchNo(String orderNo,String merchNo);
+    
+    /**
+     * 保存订单信息
+     * @param orderInfoBean
+     */
+    public void saveOrderInfo(OrderInfoBean orderInfoBean);
+    
+    /**
+     * 保存交易流水信息
+     * @param txnsLog
+     */
+    public void saveTxnsLog(PojoTxnsLog txnsLog);
 }

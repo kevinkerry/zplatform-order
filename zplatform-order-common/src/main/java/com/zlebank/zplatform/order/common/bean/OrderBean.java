@@ -62,6 +62,16 @@ public class OrderBean implements Serializable{
     private String orderDesc="";
     private String memberId="";
     private String productcode;
+    
+    //商品信息
+    private String goodsname;//商品名称
+    private Long goodsnum;//商品数量
+    private String goodscode;//商品代码
+    private String goodsdescr;//商品描述
+    private String goodstype;//商品类型
+    private Long goodsprice;//商户价格
+    
+    
     /**
      * @return the version
      */
@@ -542,6 +552,78 @@ public class OrderBean implements Serializable{
 	 */
 	public void setMemberId(String memberId) {
 		this.memberId = memberId;
+	}
+	/**
+	 * @return the goodsname
+	 */
+	public String getGoodsname() {
+		return goodsname;
+	}
+	/**
+	 * @param goodsname the goodsname to set
+	 */
+	public void setGoodsname(String goodsname) {
+		this.goodsname = goodsname;
+	}
+	/**
+	 * @return the goodsnum
+	 */
+	public Long getGoodsnum() {
+		return goodsnum;
+	}
+	/**
+	 * @param goodsnum the goodsnum to set
+	 */
+	public void setGoodsnum(Long goodsnum) {
+		this.goodsnum = goodsnum;
+	}
+	/**
+	 * @return the goodscode
+	 */
+	public String getGoodscode() {
+		return goodscode;
+	}
+	/**
+	 * @param goodscode the goodscode to set
+	 */
+	public void setGoodscode(String goodscode) {
+		this.goodscode = goodscode;
+	}
+	/**
+	 * @return the goodsdescr
+	 */
+	public String getGoodsdescr() {
+		return goodsdescr;
+	}
+	/**
+	 * @param goodsdescr the goodsdescr to set
+	 */
+	public void setGoodsdescr(String goodsdescr) {
+		this.goodsdescr = goodsdescr;
+	}
+	/**
+	 * @return the goodstype
+	 */
+	public String getGoodstype() {
+		return goodstype;
+	}
+	/**
+	 * @param goodstype the goodstype to set
+	 */
+	public void setGoodstype(String goodstype) {
+		this.goodstype = goodstype;
+	}
+	/**
+	 * @return the goodsprice
+	 */
+	public Long getGoodsprice() {
+		return goodsprice;
+	}
+	/**
+	 * @param goodsprice the goodsprice to set
+	 */
+	public void setGoodsprice(Long goodsprice) {
+		this.goodsprice = goodsprice;
 	}
 	
     
