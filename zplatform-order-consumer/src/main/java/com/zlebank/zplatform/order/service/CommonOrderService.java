@@ -13,7 +13,6 @@ package com.zlebank.zplatform.order.service;
 import com.zlebank.zplatform.order.common.bean.OrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 
 /**

@@ -10,7 +10,8 @@
  */
 package com.zlebank.zplatform.order.service.impl;
 
-import org.apache.commons.logging.Log;
+import java.net.ConnectException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.BusiType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
+import com.zlebank.zplatform.commons.dao.pojo.AccStatusEnum;
+import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.bean.CoopInsti;
+import com.zlebank.zplatform.member.bean.FinanceProductAccountBean;
+import com.zlebank.zplatform.member.bean.FinanceProductQueryBean;
 import com.zlebank.zplatform.member.bean.MemberAccountBean;
 import com.zlebank.zplatform.member.bean.MemberBean;
 import com.zlebank.zplatform.member.bean.enums.MemberType;
@@ -42,10 +47,13 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.common.enums.ExceptionTypeEnum;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
+import com.zlebank.zplatform.rmi.acc.IFinanceProductService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
+import com.zlebank.zplatform.rmi.member.IFinanceProductAccountService;
 import com.zlebank.zplatform.rmi.member.IMemberAccountService;
 import com.zlebank.zplatform.rmi.member.IMemberService;
 import com.zlebank.zplatform.rmi.member.IMerchService;
+import com.zlebank.zplatform.trade.bean.enums.BusinessEnum;
 
 /**
  * Class Description
@@ -76,6 +84,9 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	private IMemberAccountService memberAccountService;
 	@Autowired
 	private TxnsLogDAO txnsLogDAO;
+	@Autowired
+	private IFinanceProductAccountService financeProductAccountService;
+	
 	/**
 	 *
 	 * @param orderBean
@@ -135,19 +146,43 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	public void verifyBusiness(OrderBean orderBean) throws CommonException {
 		// TODO Auto-generated method stub
         PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(orderBean.getTxnType(), orderBean.getTxnSubType(), orderBean.getBizType());
-        if(StringUtil.isNotEmpty(orderBean.getMerId())){
+        BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
+        
+        if(busiTypeEnum==BusiTypeEnum.consumption){//消费
+        	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
+        	if(StringUtil.isNotEmpty(orderBean.getMerId())){
+        		 throw new CommonException("GW26", "商户号为空");
+        	}
         	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
         	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             if(prodCase==null){
                 throw new CommonException("GW26", "商户未开通此业务");
             }
-        }else{
-        	BusiType busiType = BusiType.fromValue(busiModel.getBusitype());
-            if(busiType==BusiType.CASH||busiType==BusiType.REPAIDP){
-            }else{
-            	throw new CommonException("GW26", "个人用户未开通此业务");
+            if(BusinessEnum.CONSUMEQUICK_PRODUCT==businessEnum){//产品消费业务
+            	FinanceProductQueryBean financeProductQueryBean = new FinanceProductQueryBean();
+            	financeProductQueryBean.setProductCode(orderBean.getProductcode());
+            	try {
+					FinanceProductAccountBean productAccountBean = financeProductAccountService.queryBalance(financeProductQueryBean, Usage.BASICPAY);
+					if(AcctStatusType.NORMAL!=AcctStatusType.fromValue(productAccountBean.getStatus())){
+						throw new CommonException("", "产品异常，请联系客服");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw new CommonException("", "产品不存在");
+				}
             }
+        }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
+        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+				throw new CommonException("GW19", "会员不存在无法进行充值");
+			}
+        }else if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
+        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+				throw new CommonException("GW19", "会员不存在无法进行充值");
+			}
         }
+        
+        
 	}
 
 	/**

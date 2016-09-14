@@ -12,6 +12,7 @@ package com.zlebank.zplatform.order.common.dao.impl;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
@@ -26,6 +27,7 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoProdCase;
  * @date 2016年9月12日 下午12:02:45
  * @since 
  */
+@Repository
 public class ProdCaseDAOImpl extends HibernateBaseDAOImpl<PojoProdCase> implements ProdCaseDAO{
 
 	 

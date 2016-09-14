@@ -2,19 +2,27 @@ package com.zlebank.zplatform.order.common.dao.pojo;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
 /**
  * TProdCase entity. @author MyEclipse Persistence Tools
  */
-
+@Entity
+@Table(name = "T_PROD_CASE")
 public class PojoProdCase implements java.io.Serializable {
 
 	// Fields
 
 	/**
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = -3692222731872281016L;
-    private Long caseid;
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -3692222731872281016L;
+	private Long caseid;
 	private String prdtver;
 	private String busicode;
 	private String businame;
@@ -26,168 +34,106 @@ public class PojoProdCase implements java.io.Serializable {
 	private String notes;
 	private String remarks;
 
-	// Constructors
-
-	/** default constructor */
-	public PojoProdCase() {
-	}
-
-	/**
-	 * @return the caseid
-	 */
+	// Property accessors
+	@Id
+	@Column(name = "CASEID", unique = true, nullable = false, precision = 10, scale = 0)
 	public Long getCaseid() {
-		return caseid;
+		return this.caseid;
 	}
 
-	/**
-	 * @param caseid the caseid to set
-	 */
 	public void setCaseid(Long caseid) {
 		this.caseid = caseid;
 	}
 
-	/**
-	 * @return the prdtver
-	 */
+	@Column(name = "PRDTVER", nullable = false, length = 8)
 	public String getPrdtver() {
-		return prdtver;
+		return this.prdtver;
 	}
 
-	/**
-	 * @param prdtver the prdtver to set
-	 */
 	public void setPrdtver(String prdtver) {
 		this.prdtver = prdtver;
 	}
 
-	/**
-	 * @return the busicode
-	 */
+	@Column(name = "BUSICODE", nullable = false, length = 8)
 	public String getBusicode() {
-		return busicode;
+		return this.busicode;
 	}
 
-	/**
-	 * @param busicode the busicode to set
-	 */
 	public void setBusicode(String busicode) {
 		this.busicode = busicode;
 	}
 
-	/**
-	 * @return the businame
-	 */
+	@Column(name = "BUSINAME", nullable = false, length = 64)
 	public String getBusiname() {
-		return businame;
+		return this.businame;
 	}
 
-	/**
-	 * @param businame the businame to set
-	 */
 	public void setBusiname(String businame) {
 		this.businame = businame;
 	}
 
-	/**
-	 * @return the status
-	 */
+	@Column(name = "STATUS", nullable = false, length = 2)
 	public String getStatus() {
-		return status;
+		return this.status;
 	}
 
-	/**
-	 * @param status the status to set
-	 */
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	/**
-	 * @return the inuser
-	 */
+	@Column(name = "INUSER", precision = 10, scale = 0)
 	public Long getInuser() {
-		return inuser;
+		return this.inuser;
 	}
 
-	/**
-	 * @param inuser the inuser to set
-	 */
 	public void setInuser(Long inuser) {
 		this.inuser = inuser;
 	}
 
-	/**
-	 * @return the intime
-	 */
+	@Temporal(TemporalType.DATE)
+	@Column(name = "INTIME", nullable = false, length = 7)
 	public Date getIntime() {
-		return intime;
+		return this.intime;
 	}
 
-	/**
-	 * @param intime the intime to set
-	 */
 	public void setIntime(Date intime) {
 		this.intime = intime;
 	}
 
-	/**
-	 * @return the upuser
-	 */
+	@Column(name = "UPUSER", precision = 10, scale = 0)
 	public Long getUpuser() {
-		return upuser;
+		return this.upuser;
 	}
 
-	/**
-	 * @param upuser the upuser to set
-	 */
 	public void setUpuser(Long upuser) {
 		this.upuser = upuser;
 	}
 
-	/**
-	 * @return the uptime
-	 */
+	@Temporal(TemporalType.DATE)
+	@Column(name = "UPTIME", length = 7)
 	public Date getUptime() {
-		return uptime;
+		return this.uptime;
 	}
 
-	/**
-	 * @param uptime the uptime to set
-	 */
 	public void setUptime(Date uptime) {
 		this.uptime = uptime;
 	}
 
-	/**
-	 * @return the notes
-	 */
+	@Column(name = "NOTES", length = 128)
 	public String getNotes() {
-		return notes;
+		return this.notes;
 	}
 
-	/**
-	 * @param notes the notes to set
-	 */
 	public void setNotes(String notes) {
 		this.notes = notes;
 	}
 
-	/**
-	 * @return the remarks
-	 */
+	@Column(name = "REMARKS", length = 128)
 	public String getRemarks() {
-		return remarks;
+		return this.remarks;
 	}
 
-	/**
-	 * @param remarks the remarks to set
-	 */
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
-
-	
-
-	
-
 }

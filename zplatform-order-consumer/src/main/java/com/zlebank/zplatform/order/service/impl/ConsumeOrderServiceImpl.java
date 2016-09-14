@@ -34,7 +34,6 @@ import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IMemberService;
 import com.zlebank.zplatform.rmi.member.IMerchService;
 import com.zlebank.zplatform.trade.bean.enums.TradeStatFlagEnum;
-import com.zlebank.zplatform.trade.model.TxnsLogModel;
 import com.zlebank.zplatform.trade.utils.DateUtil;
 
 /**
