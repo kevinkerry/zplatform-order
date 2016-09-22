@@ -13,16 +13,24 @@ package com.zlebank.zplatform.order.consumer.listener;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import com.google.common.base.Charsets;
+import com.zlebank.zplatform.order.common.bean.OrderBean;
+import com.zlebank.zplatform.order.common.exception.CommonException;
 import com.zlebank.zplatform.order.consumer.enums.OrderTagsEnum;
+import com.zlebank.zplatform.order.service.ConsumeOrderService;
+import com.zlebank.zplatform.order.service.OrderCacheResultService;
+import com.zlebank.zplatform.trade.bean.ResultBean;
 
 /**
  * Class Description
@@ -38,6 +46,12 @@ public class SimpleOrderListener implements MessageListenerConcurrently {
 			.getLogger(SimpleOrderListener.class);
 	private static final ResourceBundle RESOURCE = ResourceBundle
 			.getBundle("consumer");
+	private static final String KEY = "SIMPLEORDER:";
+
+	@Autowired
+	private ConsumeOrderService consumeOrderService;
+	@Autowired
+	private OrderCacheResultService orderCacheResultService;
 
 	/**
 	 *
@@ -49,23 +63,46 @@ public class SimpleOrderListener implements MessageListenerConcurrently {
 	public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
 			ConsumeConcurrentlyContext context) {
 		for (MessageExt msg : msgs) {
-
 			if (msg.getTopic().equals(
 					RESOURCE.getString("simple.order.subscribe"))) {
 				OrderTagsEnum orderTagsEnum = OrderTagsEnum.fromValue(msg
 						.getTags());
 				switch (orderTagsEnum) {
-					case COMMONCONSUME_SIMPLIFIED:
-						log.info(new String(msg.getBody(), Charsets.UTF_8));
-						log.info(msg.getMsgId());
+				case COMMONCONSUME_SIMPLIFIED:
+					String json = new String(msg.getBody(), Charsets.UTF_8);
+					log.info("接收到的MSG:{}", json);
+					log.info("接收到的MSGID:{}", msg.getMsgId());
+					OrderBean orderBean = JSON.parseObject(json,
+							OrderBean.class);
+					if (orderBean == null) {
+						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",
+								msg.getMsgId(), json);
 						break;
-	
-					case PRODUCTCONSUME_SIMPLIFIED:
-						log.info(new String(msg.getBody(), Charsets.UTF_8));
-						log.info(msg.getMsgId());
-						break;
-					default:
-						break;
+					}
+					String tn = "";
+					ResultBean resultBean = null;
+					try {
+						tn = consumeOrderService.createConsumeOrder(orderBean);
+						if (StringUtils.isNotEmpty(tn)) {
+							resultBean = new ResultBean(tn);
+						}else{
+							resultBean = new ResultBean("09","创建订单失败");
+						}
+					} catch (CommonException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						resultBean = new ResultBean(e.getCode(),e.getMessage());
+					}
+					orderCacheResultService.saveConsumeOrderOfTN(KEY
+							+ msg.getMsgId(), JSON.toJSONString(resultBean));
+					break;
+
+				case PRODUCTCONSUME_SIMPLIFIED:
+					log.info(new String(msg.getBody(), Charsets.UTF_8));
+					log.info(msg.getMsgId());
+					break;
+				default:
+					break;
 				}
 
 			}

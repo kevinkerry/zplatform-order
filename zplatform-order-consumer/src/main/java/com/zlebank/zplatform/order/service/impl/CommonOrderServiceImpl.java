@@ -100,10 +100,12 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			return null;
 		}
 		if(orderinfo.getOrderamt().longValue()!=Long.valueOf(orderBean.getTxnAmt()).longValue()){
-			throw new CommonException(ExceptionTypeEnum.SECOND_PAY.getCode(), "二次支付订单交易错误");
+			logger.info("订单金额:{};数据库订单金额:{}", orderBean.getTxnAmt(),orderinfo.getOrderamt());
+			throw new CommonException(ExceptionTypeEnum.SECOND_PAY.getCode(), "二次支付订单交易金额错误");
 		}
 		
-		if(orderinfo.getOrdercommitime().equals(orderBean.getTxnTime())){
+		if(!orderinfo.getOrdercommitime().equals(orderBean.getTxnTime())){
+			logger.info("订单时间:{};数据库订单时间:{}", orderBean.getTxnTime(),orderinfo.getOrdercommitime());
 			throw new CommonException(ExceptionTypeEnum.SECOND_PAY.getCode(), "二次支付订单提交时间错误");
 		}
 		
@@ -125,13 +127,13 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 		OrderInfoBean orderInfo = getOrderinfoByOrderNoAndMerchNo(orderBean.getOrderId(), orderBean.getMerId());
 		if (orderInfo != null) {
 			if ("00".equals(orderInfo.getStatus())) {// 交易成功订单不可二次支付
-				throw new CommonException("T004","");
+				throw new CommonException("T004","订单交易成功，请不要重复支付");
 			}
 			if ("02".equals(orderInfo.getStatus())) {
-				throw new CommonException("T009","");
+				throw new CommonException("T009","订单正在支付中，请不要重复支付");
 			}
 			if ("04".equals(orderInfo.getStatus())) {
-				throw new CommonException("T012","");
+				throw new CommonException("T012","订单失效");
 			}
 		}
 		
@@ -150,7 +152,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         
         if(busiTypeEnum==BusiTypeEnum.consumption){//消费
         	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
-        	if(StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("GW26", "商户号为空");
         	}
         	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
@@ -199,14 +201,14 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         if (StringUtil.isNotEmpty(merchant)) {
             PojoMerchDeta subMember = merchService.getMerchBymemberId(merchant);
             if (subMember == null) {
-            	throw new CommonException("GW05", "");
+            	throw new CommonException("GW05", "商户不存在");
             }
             PojoMember pojoMember = memberService.getMbmberByMemberId(merchant, null);
-            //校验商户会员信息 1-普通会员 2-商户会员 3-合作机构
+            //校验商户会员信息 
             if (pojoMember.getMemberType()==MemberType.ENTERPRISE) {// 对于企业会员需要进行检查
             	CoopInsti pojoCoopInsti = coopInstiService.getInstiByInstiID(pojoMember.getInstiId());
                 if (!coopInsti.equals(pojoCoopInsti.getInstiCode())) {
-                	throw new CommonException("GW07", "");
+                	throw new CommonException("GW07", "商户所属合作机构错误");
                 }
             }
 
@@ -254,9 +256,9 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 				logger.error(e.getMessage());
 				throw new CommonException("GW19", e.getMessage());
 			}
-			if (AcctStatusType.fromValue(memberAccountBean.getStatus()) != AcctStatusType.NORMAL) {
+			if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus())== AcctStatusType.STOP_OUT) {
 				//throw new TradeException("GW19");
-				throw new CommonException("GW19", "");
+				throw new CommonException("GW19", "会员账户状态异常");
 			}
 		}
 		if(StringUtil.isEmpty(merchant)){
@@ -275,7 +277,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 		}
 		if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.STOP_IN) {
 			//throw new TradeException("GW05");
-			throw new CommonException("GW05", "");
+			throw new CommonException("GW05", "商户账户状态异常");
 		}
 		
 	}

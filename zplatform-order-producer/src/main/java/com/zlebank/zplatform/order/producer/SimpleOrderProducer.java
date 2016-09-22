@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.producer;
 
+import java.util.Random;
 import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import com.zlebank.zplatform.order.producer.interfaces.Producer;
  */
 public class SimpleOrderProducer implements Producer{
 	private final static Logger logger = LoggerFactory.getLogger(SimpleOrderProducer.class);
-	 private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer");
+	private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer");
 	//RocketMQ消费者客户端
 	private DefaultMQProducer producer;
 	//主题
@@ -48,7 +49,8 @@ public class SimpleOrderProducer implements Producer{
 		logger.info("【namesrvAddr】"+namesrvAddr);
 		producer = new DefaultMQProducer(RESOURCE.getString("simple.order.producer.group"));
 		producer.setNamesrvAddr(namesrvAddr);
-        producer.setInstanceName(RESOURCE.getString("OrderProducer"));
+		Random random = new Random();
+        producer.setInstanceName(RESOURCE.getString("simple.order.instancename")+random.nextInt(9999));
         topic = RESOURCE.getString("simple.order.subscribe");
         logger.info("【初始化SimpleOrderProducer结束】");
 	}
@@ -70,8 +72,6 @@ public class SimpleOrderProducer implements Producer{
 		producer.start();
 		Message msg = new Message(topic, tags.getCode(), JSON.toJSONString(message).getBytes(Charsets.UTF_8));
 		producer.send(msg,sendCallback);
-		producer.shutdown();
-		producer = null;
 	}
 
 
@@ -87,14 +87,12 @@ public class SimpleOrderProducer implements Producer{
 	@Override
 	public void sendJsonMessage(String message, OrderTagsEnum tags,SendCallback sendCallback)
 			throws MQClientException, RemotingException, InterruptedException {
-		// TODO Auto-generated method stub
 		if(producer==null){
 			throw new MQClientException(-1,"SimpleOrderProducer为空");
 		}
+		producer.start();
 		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
 		producer.send(msg,sendCallback);
-		producer.shutdown();
-		producer = null;
 	}
 
 
@@ -115,10 +113,14 @@ public class SimpleOrderProducer implements Producer{
 		if(producer==null){
 			throw new MQClientException(-1,"SimpleOrderProducer为空");
 		}
+		producer.start();
 		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
 		SendResult sendResult = producer.send(msg);
+		return sendResult;
+	}
+	
+	public void closeProducer(){
 		producer.shutdown();
 		producer = null;
-		return sendResult;
 	}
 }

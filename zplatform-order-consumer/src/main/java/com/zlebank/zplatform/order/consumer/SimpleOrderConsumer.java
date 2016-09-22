@@ -61,10 +61,12 @@ public class SimpleOrderConsumer implements ApplicationListener<ContextRefreshed
 			}
 			subExpression+=tagsEnum.getCode();
 		}
+		log.info("subExpression:{}",subExpression);
 		consumer.subscribe(RESOURCE.getString("simple.order.subscribe"), subExpression);
 		consumer.registerMessageListener(simpleOrderListener);//在监听器中实现创建order
+		log.info("NamesrvAddr:{},InstanceName:{},subscribe:{},MessageListener:{}",consumer.getNamesrvAddr(),consumer.getInstanceName(),consumer.getSubscription(),consumer.getMessageListener());
 		consumer.start();
-
+		log.info("{},消费者启动",consumer.getInstanceName());
 	}
 
 	/**

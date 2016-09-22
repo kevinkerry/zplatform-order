@@ -17,6 +17,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import com.zlebank.zplatform.order.common.sequence.SerialNumberService;
@@ -49,10 +50,20 @@ public class RedisSerialNumberServiceImpl implements SerialNumberService {
 	}
 	
 	public String formateSequence(String key){
-		BoundValueOperations<String, String> boundValueOps = redisTemplate.boundValueOps(key);
+		/*BoundValueOperations<String, String> boundValueOps = redisTemplate.boundValueOps(key);
 		Long increment = boundValueOps.increment(1);
 		if(increment>=99999999){
 			boundValueOps.set("0");
+		}
+		DecimalFormat df = new DecimalFormat("00000000");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+		String seqNo = sdf.format(new Date()) + df.format(increment);
+		return seqNo;*/
+		
+		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+		Long increment = opsForValue.increment(key, 1);
+		if(increment>=99999999){
+			opsForValue.set(key, "0");
 		}
 		DecimalFormat df = new DecimalFormat("00000000");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");

@@ -42,19 +42,18 @@ import com.zlebank.zplatform.trade.utils.DateUtil;
  * @author guojia
  * @version
  * @date 2016年9月8日 下午3:35:11
- * @since 
+ * @since
  */
 @Service("consumeOrderService")
-public class ConsumeOrderServiceImpl implements ConsumeOrderService{
+public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 
-	
 	@Autowired
 	private CommonOrderService commonOrderService;
 	@Autowired
 	private SerialNumberService serialNumberService;
 	@Autowired
 	private ICoopInstiService coopInstiService;
-	@Autowired 
+	@Autowired
 	private IMerchService merchService;
 	@Autowired
 	private IMemberService memberService;
@@ -62,68 +61,58 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 	private TxncodeDefDAO txncodeDefDAO;
 	@Autowired
 	private ICoopInstiProductService coopInstiProductService;
-	
-	public void checkOrderInfo(OrderBean orderBean) throws CommonException{
-		/* 订单校验流程
-		 * 0。验签因为API层已经做了，这里不再进行验签
-		 * 1.二次订单支付，如果订单在有效期内返回TN不在有效期内返回异常信息
-		 * 2.订单有效性校验，
-		 * 3。外部交易类型校验，外部交易代码转换为内部业务代码，如果没有找到对应的业务代码返回异常信息
-		 * 4.验证商户产品版本中是否有对应的业务
-		 * 5.合作机构和商户有效性校验，如果有商户参与的话，没有则不校验（充值交易无商户参与）
+
+	@Override
+	public void checkOrderInfo(OrderBean orderBean) throws CommonException {
+		/*
+		 * 订单校验流程 0。验签因为API层已经做了，这里不再进行验签 1.二次订单支付，如果订单在有效期内返回TN不在有效期内返回异常信息
+		 * 2.订单有效性校验， 3。外部交易类型校验，外部交易代码转换为内部业务代码，如果没有找到对应的业务代码返回异常信息
+		 * 4.验证商户产品版本中是否有对应的业务 5.合作机构和商户有效性校验，如果有商户参与的话，没有则不校验（充值交易无商户参与）
 		 * 6.业务校验:充值业务，会员号不得为空或者是999999999999999
 		 * 7.校验个人会员，商户的资金账户的状态是否正常，如果不是返回异常信息
 		 */
-		
+
 		commonOrderService.verifyRepeatOrder(orderBean);
-		
+
 		commonOrderService.verifyBusiness(orderBean);
-		
-		commonOrderService.verifyMerchantAndCoopInsti(orderBean.getMerId(),orderBean.getCoopInstiId());
-		
+
+		commonOrderService.verifyMerchantAndCoopInsti(orderBean.getMerId(),
+				orderBean.getCoopInstiId());
+
 		commonOrderService.validateBusiness(orderBean);
-		
-		commonOrderService.checkBusiAcct(orderBean.getMerId(), orderBean.getMemberId());
+
+		commonOrderService.checkBusiAcct(orderBean.getMerId(),
+				orderBean.getMemberId());
 	}
-	
-	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
-	public String createConsumeOrder(OrderBean orderBean){
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public String createConsumeOrder(OrderBean orderBean) throws CommonException {
 		String tn = null;
-		try {
-			//二次支付订单
-			tn = commonOrderService.verifySecondPay(orderBean);
-			if(StringUtils.isNotEmpty(tn)){
-				return tn;
-			}
-		} catch (CommonException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+
+		// 二次支付订单
+		tn = commonOrderService.verifySecondPay(orderBean);
+		if (StringUtils.isNotEmpty(tn)) {
+			return tn;
 		}
-		
-		try {
-			//订单校验
-			checkOrderInfo(orderBean);
-		} catch (CommonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// 订单校验
+		checkOrderInfo(orderBean);
 		String txnseqno = serialNumberService.generateTxnseqno();
 		String TN = serialNumberService.generateTN(orderBean.getMerId());
-		//订单生成和交易流水保存
-		//OrderBean => OrderInfoBean
+		// 订单生成和交易流水保存
+		// OrderBean => OrderInfoBean
 		OrderInfoBean orderInfoBean = generateOrderInfoBean(orderBean);
 		orderInfoBean.setTn(TN);
 		orderInfoBean.setRelatetradetxn(txnseqno);
 		commonOrderService.saveOrderInfo(orderInfoBean);
-		//保存交易流水
+		// 保存交易流水
 		PojoTxnsLog txnsLog = generateTxnsLog(orderBean);
-		commonOrderService.saveTxnsLog(txnsLog);	
+		txnsLog.setTxnseqno(txnseqno);
+		commonOrderService.saveTxnsLog(txnsLog);
 		return orderInfoBean.getTn();
 	}
-	
-	
-	
-	private OrderInfoBean generateOrderInfoBean(OrderBean orderBean){
+
+	private OrderInfoBean generateOrderInfoBean(OrderBean orderBean) {
 		OrderInfoBean orderinfo = new OrderInfoBean();
 		orderinfo.setId(-1L);
 		orderinfo.setOrderno(orderBean.getOrderId());// 商户提交的订单号
@@ -131,10 +120,14 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 		orderinfo.setOrderfee(0L);
 		orderinfo.setOrdercommitime(orderBean.getTxnTime());
 		orderinfo.setFirmemberno(orderBean.getCoopInstiId());
-		orderinfo.setFirmembername(coopInstiService.getInstiByInstiCode(orderBean.getCoopInstiId()).getInstiName());
-		PojoMerchDeta merchant = merchService.getParentMerch(orderBean.getMerId());
+		orderinfo.setFirmembername(coopInstiService.getInstiByInstiCode(
+				orderBean.getCoopInstiId()).getInstiName());
+		PojoMerchDeta merchant = merchService.getParentMerch(orderBean
+				.getMerId());
 		orderinfo.setSecmemberno(orderBean.getMerId());
-		orderinfo.setSecmembername(StringUtil.isNotEmpty(orderBean.getMerName()) ? orderBean.getMerName() : merchant.getAccName());
+		orderinfo
+				.setSecmembername(StringUtil.isNotEmpty(orderBean.getMerName()) ? orderBean
+						.getMerName() : merchant.getAccName());
 		orderinfo.setSecmembershortname(orderBean.getMerAbbr());
 		orderinfo.setPayerip(orderBean.getCustomerIp());
 		orderinfo.setAccesstype(orderBean.getAccessType());
@@ -156,15 +149,16 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 		orderinfo.setCurrencycode("156");
 		return orderinfo;
 	}
-	
-	
-	private PojoTxnsLog generateTxnsLog(OrderBean orderBean){
+
+	private PojoTxnsLog generateTxnsLog(OrderBean orderBean) {
 		PojoTxnsLog txnsLog = new PojoTxnsLog();
 		PojoMerchDeta member = null;
-		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(orderBean.getTxnType(), orderBean.getTxnSubType(), orderBean.getBizType());
+		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
+				orderBean.getTxnType(), orderBean.getTxnSubType(),
+				orderBean.getBizType());
 		if (StringUtil.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
 			member = merchService.getMerchBymemberId(orderBean.getMerId());
-			
+
 			txnsLog.setRiskver(member.getRiskVer());
 			txnsLog.setSplitver(member.getSpiltVer());
 			txnsLog.setFeever(member.getFeeVer());
@@ -174,23 +168,23 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 					.valueOf(member.getSetlCycle().toString())));
 		} else {
 			// 10-产品版本,11-扣率版本,12-分润版本,13-风控版本,20-路由版本
-			txnsLog.setRiskver(coopInstiProductService.getDefaultVerInfo(orderBean.getCoopInstiId(),
-					busiModel.getBusicode(), 13));
-			txnsLog.setSplitver(coopInstiProductService.getDefaultVerInfo(orderBean.getCoopInstiId(),
-					busiModel.getBusicode(), 12));
-			txnsLog.setFeever(coopInstiProductService.getDefaultVerInfo(orderBean.getCoopInstiId(),
-					busiModel.getBusicode(), 11));
-			txnsLog.setPrdtver(coopInstiProductService.getDefaultVerInfo(orderBean.getCoopInstiId(),
-					busiModel.getBusicode(), 10));
-			txnsLog.setRoutver(coopInstiProductService.getDefaultVerInfo(orderBean.getCoopInstiId(),
-					busiModel.getBusicode(), 20));
+			txnsLog.setRiskver(coopInstiProductService.getDefaultVerInfo(
+					orderBean.getCoopInstiId(), busiModel.getBusicode(), 13));
+			txnsLog.setSplitver(coopInstiProductService.getDefaultVerInfo(
+					orderBean.getCoopInstiId(), busiModel.getBusicode(), 12));
+			txnsLog.setFeever(coopInstiProductService.getDefaultVerInfo(
+					orderBean.getCoopInstiId(), busiModel.getBusicode(), 11));
+			txnsLog.setPrdtver(coopInstiProductService.getDefaultVerInfo(
+					orderBean.getCoopInstiId(), busiModel.getBusicode(), 10));
+			txnsLog.setRoutver(coopInstiProductService.getDefaultVerInfo(
+					orderBean.getCoopInstiId(), busiModel.getBusicode(), 20));
 			txnsLog.setAccsettledate(DateUtil.getSettleDate(1));
 		}
 		txnsLog.setTxndate(DateUtil.getCurrentDate());
 		txnsLog.setTxntime(DateUtil.getCurrentTime());
 		txnsLog.setBusicode(busiModel.getBusicode());
 		txnsLog.setBusitype(busiModel.getBusitype());
-		
+
 		txnsLog.setAmount(Long.valueOf(orderBean.getTxnAmt()));
 		txnsLog.setAccordno(orderBean.getOrderId());
 		txnsLog.setAccfirmerno(orderBean.getCoopInstiId());
@@ -210,8 +204,9 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 			if ("999999999999999".equals(orderBean.getMemberId())) {
 				txnsLog.setAccmemberid("999999999999999");// 匿名会员号
 			} else {
-				PojoMember memberOfPerson = memberService.getMbmberByMemberId(orderBean.getMemberId(),MemberType.INDIVIDUAL);
-				
+				PojoMember memberOfPerson = memberService.getMbmberByMemberId(
+						orderBean.getMemberId(), MemberType.INDIVIDUAL);
+
 				if (memberOfPerson != null) {
 					txnsLog.setAccmemberid(orderBean.getMemberId());
 				} else {
@@ -222,5 +217,5 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService{
 		txnsLog.setTradestatflag(TradeStatFlagEnum.INITIAL.getStatus());
 		return txnsLog;
 	}
-	
+
 }

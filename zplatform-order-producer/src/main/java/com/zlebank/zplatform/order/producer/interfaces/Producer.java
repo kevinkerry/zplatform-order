@@ -59,4 +59,9 @@ public interface Producer {
 	 * @throws InterruptedException
 	 */
 	public SendResult sendJsonMessage(String message,OrderTagsEnum tags)throws MQClientException, RemotingException, InterruptedException,MQBrokerException;
+	
+	/**
+	 * 关闭生产者
+	 */
+	public void closeProducer();
 }

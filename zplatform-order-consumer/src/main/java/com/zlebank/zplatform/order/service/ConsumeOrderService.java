@@ -10,6 +10,9 @@
  */
 package com.zlebank.zplatform.order.service;
 
+import com.zlebank.zplatform.order.common.bean.OrderBean;
+import com.zlebank.zplatform.order.common.exception.CommonException;
+
 /**
  * Class Description
  *
@@ -20,4 +23,17 @@ package com.zlebank.zplatform.order.service;
  */
 public interface ConsumeOrderService {
 
+	/**
+	 * 检查订单信息
+	 * @param orderBean
+	 * @throws CommonException
+	 */
+	public void checkOrderInfo(OrderBean orderBean) throws CommonException;
+	
+	/**
+	 * 创建消费订单
+	 * @param orderBean
+	 * @return
+	 */
+	public String createConsumeOrder(OrderBean orderBean) throws CommonException;
 }
