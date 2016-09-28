@@ -10,15 +10,6 @@
         <dependent-module archiveName="zplatform-order-common-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-order-common/zplatform-order-common">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="zplatform-commons-1.4.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-commons/zplatform-commons">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="zplatform-remote-client-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-rmi-client/zplatform-rmi-client">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="zplatform-remote-bean-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-rmi-bean/zplatform-rmi-bean">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="zplatform-order-service"/>
         <property name="java-output-path" value="/zplatform-order-service/target/classes"/>
     </wb-module>
