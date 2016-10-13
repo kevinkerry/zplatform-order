@@ -13,8 +13,11 @@ package com.zlebank.zplatform.order.producer;
 import java.util.Random;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import redis.clients.jedis.Jedis;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.rocketmq.client.exception.MQBrokerException;
@@ -25,8 +28,10 @@ import com.alibaba.rocketmq.client.producer.SendResult;
 import com.alibaba.rocketmq.common.message.Message;
 import com.alibaba.rocketmq.remoting.exception.RemotingException;
 import com.google.common.base.Charsets;
+import com.zlebank.zplatform.order.producer.bean.ResultBean;
 import com.zlebank.zplatform.order.producer.enums.OrderTagsEnum;
 import com.zlebank.zplatform.order.producer.interfaces.Producer;
+import com.zlebank.zplatform.order.producer.redis.RedisFactory;
 
 /**
  * Class Description
@@ -38,6 +43,7 @@ import com.zlebank.zplatform.order.producer.interfaces.Producer;
  */
 public class SimpleOrderProducer implements Producer{
 	private final static Logger logger = LoggerFactory.getLogger(SimpleOrderProducer.class);
+	private static final String KEY = "SIMPLEORDER:";
 	private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer");
 	//RocketMQ消费者客户端
 	private DefaultMQProducer producer;
@@ -123,4 +129,47 @@ public class SimpleOrderProducer implements Producer{
 		producer.shutdown();
 		producer = null;
 	}
+
+
+
+	/**
+	 *
+	 * @param sendResult
+	 * @return
+	 */
+	@Override
+	public ResultBean queryReturnResult(SendResult sendResult) {
+		logger.info("【SimpleOrderCallback receive Result message】{}",JSON.toJSONString(sendResult));
+		logger.info("msgID:{}",sendResult.getMsgId());
+		
+		for (int i = 0;i<100;i++) {
+			String tn = getTnByCycle(sendResult.getMsgId());
+			logger.info("从redis中取得key【{}】值为{}",KEY+sendResult.getMsgId(),tn);
+			if(StringUtils.isNotEmpty(tn)){
+				ResultBean resultBean = JSON.parseObject(tn, ResultBean.class);
+				
+				logger.info("msgID:{},结果数据:{}",sendResult.getMsgId(),JSON.toJSONString(resultBean));
+				return resultBean;
+			}else{
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		logger.info("end time {}",System.currentTimeMillis());
+		return null;
+	}
+	private String getTnByCycle(String msgId){
+		Jedis jedis = RedisFactory.getInstance().getRedis();
+		String tn = jedis.get(KEY+msgId);
+		jedis.close();
+		if(StringUtils.isNotEmpty(tn)){
+			return tn;
+		}
+		return null;
+	}
+	
 }

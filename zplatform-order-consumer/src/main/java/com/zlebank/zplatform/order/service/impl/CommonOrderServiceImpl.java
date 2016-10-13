@@ -10,8 +10,6 @@
  */
 package com.zlebank.zplatform.order.service.impl;
 
-import java.net.ConnectException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
-import com.zlebank.zplatform.acc.bean.enums.BusiType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.dao.pojo.AccStatusEnum;
 import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
@@ -47,7 +43,6 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.common.enums.ExceptionTypeEnum;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
-import com.zlebank.zplatform.rmi.acc.IFinanceProductService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IFinanceProductAccountService;
 import com.zlebank.zplatform.rmi.member.IMemberAccountService;

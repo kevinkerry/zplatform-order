@@ -15,6 +15,7 @@ import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.producer.SendCallback;
 import com.alibaba.rocketmq.client.producer.SendResult;
 import com.alibaba.rocketmq.remoting.exception.RemotingException;
+import com.zlebank.zplatform.order.producer.bean.ResultBean;
 import com.zlebank.zplatform.order.producer.enums.OrderTagsEnum;
 
 /**
@@ -64,4 +65,11 @@ public interface Producer {
 	 * 关闭生产者
 	 */
 	public void closeProducer();
+	
+	/**
+	 * 查询结果
+	 * @param sendResult 
+	 * @return 结果bean
+	 */
+	public ResultBean queryReturnResult(SendResult sendResult);
 }
