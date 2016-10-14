@@ -54,7 +54,7 @@ public class SimpleOrderPorducerTest {
 	@Test
 	public void test_batchOrder() throws IOException, InterruptedException{
 		ExecutorService executorService = Executors.newCachedThreadPool();;
-		for(int i=0;i<20;i++){
+		for(int i=0;i<1;i++){
 			Runnable runnable = new ProducerThreadTest();
 			executorService.execute(runnable);
 			TimeUnit.MILLISECONDS.sleep(50);

@@ -355,8 +355,9 @@
 		</plugins>
 	</build>
 	<modules>
+		<module>../zplatform-order-common</module>
 		<module>../zplatform-order-consumer</module>
 		<module>../zplatform-order-producer</module>
-		<module>../zplatform-order-common</module>
+		<module>../zplatform-order-service</module>
 	</modules>
 </project>

@@ -16,6 +16,7 @@
 	<!-- 使用annotation 自动注册com.zlebank.zplatform.acc包下面的bean, 并保证@Required、@Autowired的属性被注入 -->
 	<context:component-scan base-package="com.zlebank.zplatform">
 	</context:component-scan>
+	
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
         <property name="locations">  
            <list>  
@@ -25,7 +26,11 @@
               <value>classpath:*.properties</value>  
             </list>  
         </property>  
-    </bean>   
+    </bean> 
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+ 		<property name="jndiName" value="java:comp/env/jdbc/trade" /> 
+ 	</bean> 
+      
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
@@ -37,11 +42,15 @@
 		</property>
 		<property name="hibernateProperties">
 			<props>
-				<prop key="dialect">org.hibernate.dialect.Oracle9Dialect</prop>
-				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">validate</prop> -->
+				<prop key="hibernate.connection.SetBigStringTryClob">true</prop>
+				<prop key="hibernate.autoReconnect">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.format_sql">true</prop>
-				<prop key="hibernate.hbm2ddl.auto">none</prop>
-				<prop key="hibernate.id.new_generator_mappings">true</prop>
+				<!-- <propery name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property> -->
+
+				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
 			</props>
 		</property>
 	</bean>
@@ -58,10 +67,7 @@
 		<property name="maxIdleTime" value="20" />
 
 	</bean> -->
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
- 		<property name="jndiName" value="java:comp/env/jdbc/trade" /> 
- 	</bean> 
-
+	
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
