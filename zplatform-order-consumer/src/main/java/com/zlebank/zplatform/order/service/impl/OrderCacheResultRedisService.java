@@ -35,13 +35,13 @@ public class OrderCacheResultRedisService implements OrderCacheResultService{
 
 	/**
 	 * 将消费订单的TN保存到redis中
-	 * @param tn
+	 * @param json
 	 */
 	@Override
-	public void saveConsumeOrderOfTN(String key,String tn) {
+	public void saveConsumeOrderOfTN(String key,String json) {
 		// TODO Auto-generated method stub
 		ValueOperations<String, Object> opsForValue = redisTemplate.opsForValue();
-		opsForValue.set(key, tn, 10, TimeUnit.MINUTES);
+		opsForValue.set(key, json, 10, TimeUnit.MINUTES);
 	}
 
 }

@@ -42,10 +42,8 @@ import com.zlebank.zplatform.trade.bean.ResultBean;
  */
 @Service("simpleOrderListener")
 public class SimpleOrderListener implements MessageListenerConcurrently {
-	private static final Logger log = LoggerFactory
-			.getLogger(SimpleOrderListener.class);
-	private static final ResourceBundle RESOURCE = ResourceBundle
-			.getBundle("consumer");
+	private static final Logger log = LoggerFactory.getLogger(SimpleOrderListener.class);
+	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("consumer");
 	private static final String KEY = "SIMPLEORDER:";
 
 	@Autowired

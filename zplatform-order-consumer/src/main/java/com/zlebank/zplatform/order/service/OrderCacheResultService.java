@@ -23,7 +23,7 @@ public interface OrderCacheResultService {
 	/**
 	 * 将订单的TN保存到缓存中
 	 * @param key
-	 * @param tn
+	 * @param json
 	 */
-	public void saveConsumeOrderOfTN(String key,String tn);
+	public void saveConsumeOrderOfTN(String key,String json);
 }
