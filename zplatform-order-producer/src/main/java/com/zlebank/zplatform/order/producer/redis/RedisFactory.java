@@ -31,7 +31,7 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 public class RedisFactory {
     private static final Logger log = LoggerFactory.getLogger(RedisFactory.class);
-    private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer");
+    private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer_order");
     private static  RedisFactory instance = new RedisFactory();
     private JedisPool pool;
 

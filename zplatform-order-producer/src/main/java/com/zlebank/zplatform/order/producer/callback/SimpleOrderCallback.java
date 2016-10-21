@@ -12,6 +12,7 @@ package com.zlebank.zplatform.order.producer.callback;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import redis.clients.jedis.Jedis;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.rocketmq.client.producer.SendCallback;
 import com.alibaba.rocketmq.client.producer.SendResult;
-import com.google.common.base.Charsets;
 import com.zlebank.zplatform.order.producer.bean.ResultBean;
 import com.zlebank.zplatform.order.producer.redis.RedisFactory;
 
@@ -53,7 +53,7 @@ public class SimpleOrderCallback implements SendCallback{
 			if(StringUtils.isNotEmpty(tn)){
 				ResultBean resultBean = JSON.parseObject(tn, ResultBean.class);
 				atomicInteger.incrementAndGet();
-				logger.info("msgID:{},结果数据:{},总和:{}",sendResult.getMsgId(),JSON.toJSONString(resultBean),atomicInteger);
+				logger.info("msgID:{},结果数据:{},总和:{}", new Object[]{sendResult.getMsgId(),JSON.toJSONString(resultBean),atomicInteger});
 				break;
 			}else{
 				try {

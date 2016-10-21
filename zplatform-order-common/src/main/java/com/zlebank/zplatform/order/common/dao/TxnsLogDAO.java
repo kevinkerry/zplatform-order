@@ -23,5 +23,11 @@ import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
  */
 public interface TxnsLogDAO extends BaseDAO<PojoTxnsLog>{
 
+	/**
+	 * 保存交易流水
+	 * @param txnsLog
+	 */
 	public void saveTxnsLog(PojoTxnsLog txnsLog);
+	
+	
 }

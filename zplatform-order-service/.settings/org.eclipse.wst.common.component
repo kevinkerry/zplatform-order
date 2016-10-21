@@ -7,7 +7,13 @@
         <dependent-module archiveName="zplatform-order-consumer-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-order-consumer/zplatform-order-consumer">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="zplatform-trade-acc-api-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-trade-acc-api/zplatform-trade-acc-api">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="zplatform-order-common-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-order-common/zplatform-order-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="zplatform-commons-1.4.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-commons/zplatform-commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="zplatform-order-service"/>

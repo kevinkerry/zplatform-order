@@ -10,6 +10,9 @@
  */
 package com.zlebank.zplatform.order.service.impl;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
+import com.zlebank.zplatform.commons.bean.CardBin;
+import com.zlebank.zplatform.commons.dao.CardBinDao;
 import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
+import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.bean.CoopInsti;
 import com.zlebank.zplatform.member.bean.FinanceProductAccountBean;
@@ -30,18 +36,25 @@ import com.zlebank.zplatform.member.bean.MemberBean;
 import com.zlebank.zplatform.member.bean.enums.MemberType;
 import com.zlebank.zplatform.member.pojo.PojoMember;
 import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.common.bean.ResultBean;
+import com.zlebank.zplatform.order.common.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.common.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.common.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.common.dao.TxnsLogDAO;
 import com.zlebank.zplatform.order.common.dao.TxnsOrderinfoDAO;
+import com.zlebank.zplatform.order.common.dao.pojo.PojoInsteadPayRealtime;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
+import com.zlebank.zplatform.order.common.enums.AccountTypeEnum;
 import com.zlebank.zplatform.order.common.enums.ExceptionTypeEnum;
 import com.zlebank.zplatform.order.common.exception.CommonException;
+import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.common.utils.Constant;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IFinanceProductAccountService;
@@ -81,7 +94,10 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	private TxnsLogDAO txnsLogDAO;
 	@Autowired
 	private IFinanceProductAccountService financeProductAccountService;
-	
+	@Autowired
+	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
+	@Autowired
+	private CardBinDao cardBinDao;
 	/**
 	 *
 	 * @param orderBean
@@ -103,8 +119,6 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			logger.info("订单时间:{};数据库订单时间:{}", orderBean.getTxnTime(),orderinfo.getOrdercommitime());
 			throw new CommonException(ExceptionTypeEnum.SECOND_PAY.getCode(), "二次支付订单提交时间错误");
 		}
-		
-		
 		return orderinfo.getTn();
 	}
 
@@ -177,6 +191,17 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("GW19", "会员不存在无法进行充值");
 			}
+        }else if(busiTypeEnum==BusiTypeEnum.insteadPay){
+        	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        		 throw new CommonException("GW26", "商户号为空");
+        	}
+        	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            if(prodCase==null){
+                throw new CommonException("GW26", "商户未开通此业务");
+            }
+            
         }
         
         
@@ -308,6 +333,133 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	public void saveTxnsLog(PojoTxnsLog txnsLog) {
 		// TODO Auto-generated method stub
 		txnsLogDAO.saveTxnsLog(txnsLog);
+	}
+
+	/**
+	 *
+	 * @param insteadPayOrderBean
+	 * @return
+	 * @throws InsteadPayOrderException
+	 */
+	@Override
+	public String verifySecondInsteadPay(InsteadPayOrderBean insteadPayOrderBean)
+			throws InsteadPayOrderException {
+		PojoInsteadPayRealtime queryInsteadPayOrder = insteadPayRealtimeDAO.queryInsteadPayOrder(insteadPayOrderBean.getOrderId(), insteadPayOrderBean.getMerId());
+		if(queryInsteadPayOrder!=null){
+			if(!queryInsteadPayOrder.getOrderCommiTime().equals(insteadPayOrderBean.getTxnTime())){
+				throw new InsteadPayOrderException("SE13");
+			}
+			if(!queryInsteadPayOrder.getAccName().equals(insteadPayOrderBean.getAccName())){
+				throw new InsteadPayOrderException("SE13");
+			}
+			if(!queryInsteadPayOrder.getAccNo().equals(insteadPayOrderBean.getAccNo())){
+				throw new InsteadPayOrderException("SE13");
+			}
+			if(!queryInsteadPayOrder.getTransAmt().toString().equals(insteadPayOrderBean.getTxnAmt())){
+				throw new InsteadPayOrderException("SE13");
+			}
+			return queryInsteadPayOrder.getTn();
+		}
+		return null;
+	}
+
+	/**
+	 *
+	 * @param insteadPayOrderBean
+	 * @throws InsteadPayOrderException 
+	 */
+	@Override
+	public void verifyRepeatInsteadPayOrder(
+			InsteadPayOrderBean insteadPayOrderBean) throws InsteadPayOrderException {
+		// TODO Auto-generated method stub
+		PojoInsteadPayRealtime queryInsteadPayOrder = insteadPayRealtimeDAO.queryInsteadPayOrder(insteadPayOrderBean.getOrderId(), insteadPayOrderBean.getMerId());
+		if (queryInsteadPayOrder != null) {
+			if ("00".equals(queryInsteadPayOrder.getStatus())) {// 交易成功订单不可二次支付
+				throw new InsteadPayOrderException("T004","订单交易成功，请不要重复支付");
+			}
+			if ("02".equals(queryInsteadPayOrder.getStatus())) {
+				throw new InsteadPayOrderException("T009","订单正在支付中，请不要重复支付");
+			}
+			if ("04".equals(queryInsteadPayOrder.getStatus())) {
+				throw new InsteadPayOrderException("T012","订单失效");
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param merchant
+	 * @throws CommonException
+	 * @throws InsteadPayOrderException 
+	 */
+	@Override
+	public void checkBusiAcctOfInsteadPay(String merchant,String txnAmt)
+			throws CommonException, InsteadPayOrderException {
+		MemberBean member = new MemberBean();
+		member.setMemberId(merchant);
+		MemberAccountBean memberAccountBean = null;
+		try {
+			memberAccountBean = memberAccountService.queryBalance(MemberType.ENTERPRISE, member, Usage.BASICPAY);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			throw new CommonException("GW05", e.getMessage());
+		}
+		if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.STOP_OUT) {
+			//throw new TradeException("GW05");
+			throw new CommonException("GW05", "商户账户状态异常");
+		}
+		
+		// 商户余额是否足够
+        BigDecimal payBalance = new BigDecimal(txnAmt);
+       
+        BigDecimal merBalance = memberAccountBean != null ? memberAccountBean.getBalance() : BigDecimal.ZERO;
+        if (merBalance.compareTo(payBalance) < 0) {
+        	throw new InsteadPayOrderException("SE12");
+        }
+		
+	}
+
+	/**
+	 *
+	 * @throws InsteadPayOrderException
+	 */
+	@Override
+	public void checkInsteadPayTime() throws InsteadPayOrderException {
+		// TODO Auto-generated method stub
+		//交易时间是否在规定时间内
+		Date currentTime;
+        try {
+            String startTime = Constant.getInstance().getInstead_pay_realtime_start_time();
+                   
+            String endTime = Constant.getInstance().getInstead_pay_realtime_end_time();
+            currentTime = DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
+            Date insteadStartTime = DateUtil.convertToDate(startTime,"HHmmss");
+            Date insteadEndTime = DateUtil.convertToDate(endTime,"HHmmss");
+            if (currentTime.before(insteadEndTime)
+                   && currentTime.after(insteadStartTime)) {
+            	throw new InsteadPayOrderException("SE06");//非交易时间
+            } 
+        } catch (Exception e) {
+        	logger.error(e.getLocalizedMessage(), e);
+            throw new InsteadPayOrderException("SE07");
+        }
+	}
+
+	/**
+	 *
+	 * @param cardNo
+	 * @param cardType
+	 * @throws InsteadPayOrderException
+	 */
+	@Override
+	public CardBin checkInsteadPayCard(String cardNo)throws InsteadPayOrderException {
+		 CardBin cardMap = cardBinDao.getCard(cardNo);
+		 if(cardMap==null||cardMap.getType()==null){
+			 throw new InsteadPayOrderException("SE13");
+		 }
+		 return cardMap;
 	}
 
 }

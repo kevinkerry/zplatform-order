@@ -27,7 +27,9 @@ public enum OrderTagsEnum {
 	/**产品订单-传统*/
 	PRODUCTCONSUME_SIMPLIFIED("TAG_003"),
 	/**产品订单-精简*/
-	PRODUCTCONSUME_TRADITION("TAG_004");
+	PRODUCTCONSUME_TRADITION("TAG_004"),
+	/**实时代付订单*/
+	INSTEADPAY_REALTIME("TAG_005");
 	private String code;
 
 	/**

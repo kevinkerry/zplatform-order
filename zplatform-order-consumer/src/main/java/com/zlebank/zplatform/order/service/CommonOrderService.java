@@ -10,10 +10,13 @@
  */
 package com.zlebank.zplatform.order.service;
 
+import com.zlebank.zplatform.commons.bean.CardBin;
+import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.common.exception.CommonException;
+import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
 
 /**
  * Class Description
@@ -92,4 +95,41 @@ public interface CommonOrderService {
      * @param txnsLog
      */
     public void saveTxnsLog(PojoTxnsLog txnsLog);
+    
+    /**
+     * 校验订单是否为二次代付订单
+     * @param insteadPayOrderBean 代付订单bean
+     * @return tn 受理订单号
+     * @throws InsteadPayOrderException 代付订单异常
+     */
+    public String verifySecondInsteadPay(InsteadPayOrderBean insteadPayOrderBean) throws InsteadPayOrderException;
+    
+    /**
+     * 校验代付订单的唯一性
+     * @param insteadPayOrderBean
+     * @throws InsteadPayOrderException 代付订单异常
+     */
+    public void verifyRepeatInsteadPayOrder(InsteadPayOrderBean insteadPayOrderBean) throws InsteadPayOrderException ;
+    
+    /**
+     * 检查代付业务资金账户状态
+     * @param merchant 商户号
+     * @param txnAmt 交易金额
+     * @throws CommonException
+     * @throws InsteadPayOrderException
+     */
+    public void checkBusiAcctOfInsteadPay(String merchant,String txnAmt) throws CommonException,InsteadPayOrderException;
+    
+    /**
+     * 检查代付时间
+     * @throws InsteadPayOrderException
+     */
+    public void checkInsteadPayTime() throws InsteadPayOrderException;
+    
+    /**
+     * 检查代付的银行卡（只限对私）
+     * @param cardNo 银行卡号
+     * @throws InsteadPayOrderException
+     */
+    public CardBin checkInsteadPayCard(String cardNo) throws InsteadPayOrderException;
 }

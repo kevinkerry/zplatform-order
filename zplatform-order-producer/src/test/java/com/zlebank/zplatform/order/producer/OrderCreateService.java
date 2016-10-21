@@ -8,7 +8,7 @@
  * Copyright (c) 2016,zlebank.All rights reserved.
  * 
  */
-package com.zlebank.zplatform.order.producer.interfaces;
+package com.zlebank.zplatform.order.producer;
 
 import com.zlebank.zplatform.order.producer.bean.OrderBean;
 

@@ -38,6 +38,7 @@
 		<property name="packagesToScan">
 			<list>
 				<value>com.zlebank.zplatform.order.common.dao.pojo</value>
+				<value>com.zlebank.zplatform.commons.dao.pojo</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">

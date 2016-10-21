@@ -43,7 +43,7 @@ import com.zlebank.zplatform.trade.bean.ResultBean;
 @Service("simpleOrderListener")
 public class SimpleOrderListener implements MessageListenerConcurrently {
 	private static final Logger log = LoggerFactory.getLogger(SimpleOrderListener.class);
-	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("consumer");
+	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("consumer_order");
 	private static final String KEY = "SIMPLEORDER:";
 
 	@Autowired
@@ -61,8 +61,7 @@ public class SimpleOrderListener implements MessageListenerConcurrently {
 	public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
 			ConsumeConcurrentlyContext context) {
 		for (MessageExt msg : msgs) {
-			if (msg.getTopic().equals(
-					RESOURCE.getString("simple.order.subscribe"))) {
+			if (msg.getTopic().equals(RESOURCE.getString("simple.order.subscribe"))) {
 				OrderTagsEnum orderTagsEnum = OrderTagsEnum.fromValue(msg
 						.getTags());
 				switch (orderTagsEnum) {

@@ -1,9 +1,9 @@
 /* 
- * SimpleOrderProducer.java  
+ * InsteadPayOrderProducer.java  
  * 
  * version TODO
  *
- * 2016年9月7日 
+ * 2016年10月20日 
  * 
  * Copyright (c) 2016,zlebank.All rights reserved.
  * 
@@ -38,71 +38,61 @@ import com.zlebank.zplatform.order.producer.redis.RedisFactory;
  *
  * @author guojia
  * @version
- * @date 2016年9月7日 下午12:46:36
+ * @date 2016年10月20日 下午3:18:41
  * @since 
  */
-public class SimpleOrderProducer implements Producer{
+public class InsteadPayOrderProducer implements Producer {
 	private final static Logger logger = LoggerFactory.getLogger(SimpleOrderProducer.class);
-	private static final String KEY = "SIMPLEORDER:";
+	private static final String KEY = "INSTEADPAYORDER:";
 	private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer_order");
 	//RocketMQ消费者客户端
 	private DefaultMQProducer producer;
 	//主题
 	private String topic;
-		
 	
-	public SimpleOrderProducer(String namesrvAddr) throws MQClientException{
-		logger.info("【初始化SimpleOrderProducer】");
-		logger.info("【namesrvAddr】"+namesrvAddr);
-		producer = new DefaultMQProducer(RESOURCE.getString("simple.order.producer.group"));
+	public InsteadPayOrderProducer(String namesrvAddr) throws MQClientException{
+		logger.info("【初始化InsteadPayOrderProducer】");
+		logger.info("【namesrvAddr】"+namesrvAddr);          
+		producer = new DefaultMQProducer(RESOURCE.getString("insteadpay.order.producer.group"));
 		producer.setNamesrvAddr(namesrvAddr);
 		Random random = new Random();
-        producer.setInstanceName(RESOURCE.getString("simple.order.instancename")+random.nextInt(9999));
-        topic = RESOURCE.getString("simple.order.subscribe");
-        logger.info("【初始化SimpleOrderProducer结束】");
+        producer.setInstanceName(RESOURCE.getString("insteadpay.order.instancename")+random.nextInt(9999));
+        topic = RESOURCE.getString("insteadpay.order.subscribe");
+        logger.info("【初始化InsteadPayOrderProducer结束】");
 	}
-	
-	
-	 
-	/**
-	 *
-	 * @param message
-	 * @throws InterruptedException 
-	 * @throws RemotingException 
-	 * @throws MQClientException 
-	 */
-	@Override
-	public void sendMessage(Object message,OrderTagsEnum tags,SendCallback sendCallback) throws MQClientException, RemotingException, InterruptedException {
-		if(producer==null){
-			throw new MQClientException(-1,"未创建SimpleOrderProducer");
-		}
-		producer.start();
-		Message msg = new Message(topic, tags.getCode(), JSON.toJSONString(message).getBytes(Charsets.UTF_8));
-		producer.send(msg,sendCallback);
-	}
-
-
-
 	/**
 	 *
 	 * @param message
 	 * @param tags
+	 * @param sendCallback
 	 * @throws MQClientException
 	 * @throws RemotingException
 	 * @throws InterruptedException
 	 */
 	@Override
-	public void sendJsonMessage(String message, OrderTagsEnum tags,SendCallback sendCallback)
-			throws MQClientException, RemotingException, InterruptedException {
-		if(producer==null){
-			throw new MQClientException(-1,"SimpleOrderProducer为空");
-		}
-		producer.start();
-		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
-		producer.send(msg,sendCallback);
+	public void sendMessage(Object message, OrderTagsEnum tags,
+			SendCallback sendCallback) throws MQClientException,
+			RemotingException, InterruptedException {
+		// TODO Auto-generated method stub
+
 	}
 
+	/**
+	 *
+	 * @param message
+	 * @param tags
+	 * @param sendCallback
+	 * @throws MQClientException
+	 * @throws RemotingException
+	 * @throws InterruptedException
+	 */
+	@Override
+	public void sendJsonMessage(String message, OrderTagsEnum tags,
+			SendCallback sendCallback) throws MQClientException,
+			RemotingException, InterruptedException {
+		// TODO Auto-generated method stub
 
+	}
 
 	/**
 	 *
@@ -112,26 +102,30 @@ public class SimpleOrderProducer implements Producer{
 	 * @throws MQClientException
 	 * @throws RemotingException
 	 * @throws InterruptedException
-	 * @throws MQBrokerException 
+	 * @throws MQBrokerException
 	 */
 	@Override
 	public SendResult sendJsonMessage(String message, OrderTagsEnum tags)
-			throws MQClientException, RemotingException, InterruptedException, MQBrokerException {
+			throws MQClientException, RemotingException, InterruptedException,
+			MQBrokerException {
 		if(producer==null){
-			throw new MQClientException(-1,"SimpleOrderProducer为空");
+			throw new MQClientException(-1,"InsteadPayOrderProducer为空");
 		}
 		producer.start();
 		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
 		SendResult sendResult = producer.send(msg);
 		return sendResult;
 	}
-	
-	public void closeProducer(){
+
+	/**
+	 *
+	 */
+	@Override
+	public void closeProducer() {
+		// TODO Auto-generated method stub
 		producer.shutdown();
 		producer = null;
 	}
-
-
 
 	/**
 	 *
@@ -140,7 +134,7 @@ public class SimpleOrderProducer implements Producer{
 	 */
 	@Override
 	public ResultBean queryReturnResult(SendResult sendResult) {
-		logger.info("【SimpleOrderCallback receive Result message】{}",JSON.toJSONString(sendResult));
+		logger.info("【InsteadPayOrderProducer receive Result message】{}",JSON.toJSONString(sendResult));
 		logger.info("msgID:{}",sendResult.getMsgId());
 		
 		for (int i = 0;i<100;i++) {
@@ -172,5 +166,4 @@ public class SimpleOrderProducer implements Producer{
 		}
 		return null;
 	}
-	
 }
