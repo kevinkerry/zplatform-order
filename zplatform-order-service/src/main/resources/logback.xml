@@ -14,6 +14,9 @@
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
 		</layout>
+		<encoder>
+      		<pattern>%date-%level-[%F:%L]-[%thread]-%msg%n</pattern>
+    	</encoder>
 	</appender>
 
 	<!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 -->

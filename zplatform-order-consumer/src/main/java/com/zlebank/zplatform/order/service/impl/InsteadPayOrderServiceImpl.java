@@ -270,15 +270,15 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		ResultBean resultBean = ValidateLocator.validateBeans(insteadPayOrderBean);
 		CurrencyEnum  rmb = CurrencyEnum.fromValue(insteadPayOrderBean.getCurrencyCode());
         if(rmb==null || rmb.equals(CurrencyEnum.UNKNOW)){
-       	 	throw  new InsteadPayOrderException("SE01");
+       	 	throw  new InsteadPayOrderException("OD025");//代付货币类型错误
         }
         AccountTypeEnum  accType = AccountTypeEnum.fromValue(insteadPayOrderBean.getAccType());
         if(accType==null || accType.equals(AccountTypeEnum.UNKNOW)){
-        	throw  new InsteadPayOrderException("SE02");
+        	throw  new InsteadPayOrderException("SE02");//代付账户类型错误
         }
         CertifTypeEnmu certype = CertifTypeEnmu.fromValue(insteadPayOrderBean.getCertifTp());
         if(certype==null || certype.equals(AccountTypeEnum.UNKNOW)){
-        	throw  new InsteadPayOrderException("SE03");
+        	throw  new InsteadPayOrderException("OD027");//代付证件类型错误
         }
 		return resultBean;
 	}

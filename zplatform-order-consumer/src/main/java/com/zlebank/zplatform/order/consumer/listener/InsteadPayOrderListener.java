@@ -88,6 +88,9 @@ public class InsteadPayOrderListener implements MessageListenerConcurrently {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 							resultBean = new ResultBean(e.getCode(),e.getMessage());
+						}catch (Throwable e) {
+							e.printStackTrace();
+							resultBean = new ResultBean("T000",e.getMessage());
 						}
 						orderCacheResultService.saveConsumeOrderOfTN(KEY
 								+ msg.getMsgId(), JSON.toJSONString(resultBean));
