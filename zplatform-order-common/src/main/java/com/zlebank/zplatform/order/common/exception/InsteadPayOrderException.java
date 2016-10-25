@@ -25,7 +25,7 @@ public class InsteadPayOrderException extends Exception {
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = -3598757186736680558L;
-	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("order_exception");
+	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("customer_exception");
 	private String code;
 	private String message;
 
