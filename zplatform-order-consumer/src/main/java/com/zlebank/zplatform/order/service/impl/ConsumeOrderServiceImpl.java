@@ -184,7 +184,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 		txnsLog.setTxntime(DateUtil.getCurrentTime());
 		txnsLog.setBusicode(busiModel.getBusicode());
 		txnsLog.setBusitype(busiModel.getBusitype());
-
+		txnsLog.setTradcomm(0L);
 		txnsLog.setAmount(Long.valueOf(orderBean.getTxnAmt()));
 		txnsLog.setAccordno(orderBean.getOrderId());
 		txnsLog.setAccfirmerno(orderBean.getCoopInstiId());

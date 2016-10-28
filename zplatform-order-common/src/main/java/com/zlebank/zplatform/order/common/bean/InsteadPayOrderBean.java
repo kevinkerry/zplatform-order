@@ -45,7 +45,7 @@ public class InsteadPayOrderBean implements Serializable {
 	 *  产品类型
 	 */
 	@NotEmpty(message = "param.empty.bizType")
-	@Length(max = 2, message = "param.error.bizType")
+	@Length(max = 6, message = "param.error.bizType")
 	private String bizType;
 	/** 
 	 * 渠道类型

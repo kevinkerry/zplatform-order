@@ -96,8 +96,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	private IFinanceProductAccountService financeProductAccountService;
 	@Autowired
 	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
-	@Autowired
-	private CardBinDao cardBinDao;
+	
 	/**
 	 *
 	 * @param orderBean
@@ -435,8 +434,8 @@ public class CommonOrderServiceImpl implements CommonOrderService{
                    
             String endTime = Constant.getInstance().getInstead_pay_realtime_end_time();
             currentTime = DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
-            Date insteadStartTime = DateUtil.convertToDate(startTime,"HHmmss");
-            Date insteadEndTime = DateUtil.convertToDate(endTime,"HHmmss");
+            Date insteadStartTime = DateUtil.convertToDate(DateUtil.getCurrentDate()+startTime,"HHmmss");
+            Date insteadEndTime = DateUtil.convertToDate(DateUtil.getCurrentDate()+endTime,"HHmmss");
             if (currentTime.before(insteadEndTime)
                    && currentTime.after(insteadStartTime)) {
             	throw new InsteadPayOrderException("OD021");//非交易时间
@@ -455,7 +454,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	 */
 	@Override
 	public CardBin checkInsteadPayCard(String cardNo)throws InsteadPayOrderException {
-		 CardBin cardMap = cardBinDao.getCard(cardNo);
+		 CardBin cardMap = txnsLogDAO.getCard(cardNo);
 		 if(cardMap==null||cardMap.getType()==null){
 			 throw new InsteadPayOrderException("OD024");
 		 }

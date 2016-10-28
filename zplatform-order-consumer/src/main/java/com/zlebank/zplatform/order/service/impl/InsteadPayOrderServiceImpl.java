@@ -75,8 +75,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 	private IMemberService memberService;
 	@Autowired
 	private IMemberAccountService memberAccountService;
-	@Autowired
-	private CardBinDao cardBinDao;
+	
 	@Autowired
 	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
 	@Autowired
@@ -236,7 +235,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		//收款人账号
 		txnsLog.setPan(insteadPayOrderBean.getAccNo());
 		//收款人账户联行号
-		txnsLog.setIncardinstino(insteadPayOrderBean.getBankCode_DB());
+		txnsLog.setCardinstino(insteadPayOrderBean.getBankCode_DB());
 		//卡类型
 		txnsLog.setCardtype(insteadPayOrderBean.getCardType());
 		txnsLog.setTradcomm(0L);

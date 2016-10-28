@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.common.dao;
 
+import com.zlebank.zplatform.commons.bean.CardBin;
 import com.zlebank.zplatform.commons.dao.BaseDAO;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
 
@@ -28,6 +29,10 @@ public interface TxnsLogDAO extends BaseDAO<PojoTxnsLog>{
 	 * @param txnsLog
 	 */
 	public void saveTxnsLog(PojoTxnsLog txnsLog);
-	
-	
+	/**
+	 * 查询卡bin信息
+	 * @param cardNo
+	 * @return
+	 */
+	public CardBin getCard(String cardNo) ;
 }

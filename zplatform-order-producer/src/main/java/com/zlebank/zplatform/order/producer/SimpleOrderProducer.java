@@ -153,7 +153,7 @@ public class SimpleOrderProducer implements Producer{
 				return resultBean;
 			}else{
 				try {
-					Thread.sleep(100);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
