@@ -60,6 +60,7 @@ public class SimpleOrderListener implements MessageListenerConcurrently {
 	@Override
 	public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
 			ConsumeConcurrentlyContext context) {
+		
 		for (MessageExt msg : msgs) {
 			if (msg.getTopic().equals(RESOURCE.getString("simple.order.subscribe"))) {
 				OrderTagsEnum orderTagsEnum = OrderTagsEnum.fromValue(msg
