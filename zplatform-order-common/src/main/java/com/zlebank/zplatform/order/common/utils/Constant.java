@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.lang.math.NumberUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Class Description
