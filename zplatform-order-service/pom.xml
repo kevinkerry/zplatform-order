@@ -1,12 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.zlebank.zplatform</groupId>
+	
+	<parent>
+		<groupId>com.zlebank.zplatform</groupId>
+		<artifactId>zplatform-order-deploy</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../zplatform-order-deploy/pom.xml</relativePath>
+	</parent>
 	<artifactId>zplatform-order-service</artifactId>
 	<packaging>war</packaging>
-	<version>1.0.0-SNAPSHOT</version>
-	<name>zplatform-order-service Maven Webapp</name>
+	<name>zplatform-order-service</name>
 	<url>http://maven.apache.org</url>
+	<description>证联支付平台-订单服务</description>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
