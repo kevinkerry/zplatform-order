@@ -147,6 +147,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 		orderinfo.setPaytimeout(orderBean.getPayTimeout());
 		orderinfo.setMemberid(orderBean.getMemberId());
 		orderinfo.setCurrencycode("156");
+		orderinfo.setStatus("01");
 		return orderinfo;
 	}
 
