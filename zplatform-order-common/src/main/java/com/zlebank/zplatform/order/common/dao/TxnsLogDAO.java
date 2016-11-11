@@ -35,4 +35,11 @@ public interface TxnsLogDAO extends BaseDAO<PojoTxnsLog>{
 	 * @return
 	 */
 	public CardBin getCard(String cardNo) ;
+	
+	/**
+	 * 通过交易序列号获取交易流水
+	 * @param txnseqno 交易序列号
+	 * @return 交易流水pojo
+	 */
+	public PojoTxnsLog getTxnsLogByTxnseqno(String txnseqno);
 }

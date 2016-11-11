@@ -38,6 +38,7 @@ public class RedisSerialNumberServiceImpl implements SerialNumberService {
 	
 	private static final String TXNSEQNO_KEY="SEQUENCE:TXNSEQNO";
 	private static final String TN_KEY="SEQUENCE:TN";
+	private static final String REFUND_KEY="SEQUENCE:REFUND";
 
 	public String generateTxnseqno() {
 		String seqNo = formateSequence(TXNSEQNO_KEY);
@@ -69,5 +70,15 @@ public class RedisSerialNumberServiceImpl implements SerialNumberService {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
 		String seqNo = sdf.format(new Date()) + df.format(increment);
 		return seqNo;
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public String generateRefundNo() {
+		String seqNo = formateSequence(REFUND_KEY);
+		return seqNo.substring(0, 6) + "40" + seqNo.substring(6);
 	}
 }

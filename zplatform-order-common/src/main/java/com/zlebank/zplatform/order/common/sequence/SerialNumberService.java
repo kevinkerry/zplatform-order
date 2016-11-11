@@ -32,4 +32,10 @@ public interface SerialNumberService {
 	 * @return
 	 */
 	public String generateTN(String memberId);
+	
+	/**
+	 * 生成退款订单号
+	 * @return
+	 */
+	public String generateRefundNo();
 }

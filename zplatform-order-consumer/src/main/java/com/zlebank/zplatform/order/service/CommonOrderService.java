@@ -14,9 +14,11 @@ import com.zlebank.zplatform.commons.bean.CardBin;
 import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.common.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.common.exception.RefundOrderException;
 
 /**
  * Class Description
@@ -132,4 +134,25 @@ public interface CommonOrderService {
      * @throws InsteadPayOrderException
      */
     public CardBin checkInsteadPayCard(String cardNo) throws InsteadPayOrderException;
+    
+    /**
+     * 校验退款订单的唯一性
+     * @param refundOrderBean
+     */
+    public void verifyRepeatRefundOrder(RefundOrderBean refundOrderBean) throws RefundOrderException ;
+    
+    /**
+     * 检查退款商户账户状态
+     * @param merchant
+     * @param txnAmt
+     * @throws CommonException
+     * @throws RefundOrderException
+     */
+    public void checkBusiAcctOfRefund(String merchant,String txnAmt) throws CommonException, RefundOrderException;
+    
+    /**
+     * 检查退款订单的原始交易订单
+     * @param refundOrderBean
+     */
+    public void checkOldOrder(RefundOrderBean refundOrderBean) throws RefundOrderException;
 }

@@ -11,8 +11,10 @@
 package com.zlebank.zplatform.order.service.impl;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,6 @@ import com.zlebank.zplatform.commons.bean.CardBin;
 import com.zlebank.zplatform.commons.dao.CardBinDao;
 import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
-import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.bean.CoopInsti;
 import com.zlebank.zplatform.member.bean.FinanceProductAccountBean;
@@ -39,12 +40,14 @@ import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
 import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderBean;
 import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.common.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.common.bean.ResultBean;
 import com.zlebank.zplatform.order.common.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.common.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.common.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.common.dao.TxnsLogDAO;
 import com.zlebank.zplatform.order.common.dao.TxnsOrderinfoDAO;
+import com.zlebank.zplatform.order.common.dao.TxnsRefundDAO;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoInsteadPayRealtime;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.common.dao.pojo.PojoTxncodeDef;
@@ -54,7 +57,9 @@ import com.zlebank.zplatform.order.common.enums.AccountTypeEnum;
 import com.zlebank.zplatform.order.common.enums.ExceptionTypeEnum;
 import com.zlebank.zplatform.order.common.exception.CommonException;
 import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.common.exception.RefundOrderException;
 import com.zlebank.zplatform.order.common.utils.Constant;
+import com.zlebank.zplatform.order.common.utils.DateUtil;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IFinanceProductAccountService;
@@ -62,6 +67,8 @@ import com.zlebank.zplatform.rmi.member.IMemberAccountService;
 import com.zlebank.zplatform.rmi.member.IMemberService;
 import com.zlebank.zplatform.rmi.member.IMerchService;
 import com.zlebank.zplatform.trade.bean.enums.BusinessEnum;
+import com.zlebank.zplatform.trade.model.TxnsLogModel;
+import com.zlebank.zplatform.trade.model.TxnsOrderinfoModel;
 
 /**
  * Class Description
@@ -96,7 +103,8 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	private IFinanceProductAccountService financeProductAccountService;
 	@Autowired
 	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
-	
+	@Autowired
+	private TxnsRefundDAO txnsRefundDAO;
 	/**
 	 *
 	 * @param orderBean
@@ -183,15 +191,33 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 				}
             }
         }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
+        	//个人充值
         	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
+        	//商户充值
+        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        		PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+            	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            	 if(prodCase==null){
+                     throw new CommonException("OD005", "商户未开通此业务");
+                 }
+        	}
+        	
         }else if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
+        	//个人提现
         	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
+        	//商户提现
+        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        		PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+            	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            	 if(prodCase==null){
+                     throw new CommonException("OD005", "商户未开通此业务");
+                 }
+        	}
         }else if(busiTypeEnum==BusiTypeEnum.insteadPay){
-        	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
         	if(StringUtil.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
@@ -201,6 +227,15 @@ public class CommonOrderServiceImpl implements CommonOrderService{
                 throw new CommonException("OD005", "商户未开通此业务");
             }
             
+        }else if(busiTypeEnum==BusiTypeEnum.refund){
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        		 throw new CommonException("OD004", "商户号为空");
+        	}
+        	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            if(prodCase==null){
+                throw new CommonException("OD005", "商户未开通此业务");
+            }
         }
         
         
@@ -433,9 +468,9 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             String startTime = Constant.getInstance().getInstead_pay_realtime_start_time();
                    
             String endTime = Constant.getInstance().getInstead_pay_realtime_end_time();
-            currentTime = DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
-            Date insteadStartTime = DateUtil.convertToDate(DateUtil.getCurrentDate()+startTime,"HHmmss");
-            Date insteadEndTime = DateUtil.convertToDate(DateUtil.getCurrentDate()+endTime,"HHmmss");
+            currentTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
+            Date insteadStartTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentDate()+startTime,"HHmmss");
+            Date insteadEndTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentDate()+endTime,"HHmmss");
             if (currentTime.before(insteadEndTime)
                    && currentTime.after(insteadStartTime)) {
             	throw new InsteadPayOrderException("OD021");//非交易时间
@@ -459,6 +494,134 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			 throw new InsteadPayOrderException("OD024");
 		 }
 		 return cardMap;
+	}
+
+	/**
+	 *
+	 * @param refundOrderBean
+	 * @throws RefundOrderException 
+	 */
+	@Override
+	public void verifyRepeatRefundOrder(RefundOrderBean refundOrderBean) throws RefundOrderException {
+		// TODO Auto-generated method stub
+		OrderInfoBean orderInfo = getOrderinfoByOrderNoAndMerchNo(refundOrderBean.getOrderId(), refundOrderBean.getMerId());
+		if (orderInfo != null) {
+			if ("00".equals(orderInfo.getStatus())) {// 交易成功订单不可二次支付
+				throw new RefundOrderException("OD029");
+			}
+			if ("02".equals(orderInfo.getStatus())) {
+				throw new RefundOrderException("OD030");
+			}
+			if ("04".equals(orderInfo.getStatus())) {
+				throw new RefundOrderException("OD003");
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param merchant
+	 * @param txnAmt
+	 * @throws CommonException
+	 * @throws RefundOrderException
+	 */
+	@Override
+	public void checkBusiAcctOfRefund(String merchant, String txnAmt)
+			throws CommonException, RefundOrderException {
+		// TODO Auto-generated method stub
+		MemberBean member = new MemberBean();
+		member.setMemberId(merchant);
+		MemberAccountBean memberAccountBean = null;
+		try {
+			memberAccountBean = memberAccountService.queryBalance(MemberType.ENTERPRISE, member, Usage.BASICPAY);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			throw new RefundOrderException("OD012");
+		}
+		if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.STOP_OUT) {
+			//throw new TradeException("GW05");
+			throw new RefundOrderException("OD014");
+		}
+		
+		// 商户余额是否足够
+        BigDecimal payBalance = new BigDecimal(txnAmt);
+       
+        BigDecimal merBalance = memberAccountBean != null ? memberAccountBean.getBalance() : BigDecimal.ZERO;
+        if (merBalance.compareTo(payBalance) < 0) {
+        	throw new RefundOrderException("OD023");
+        }
+	}
+
+	/**
+	 *
+	 * @param refundOrderBean
+	 */
+	@Override
+	public void checkOldOrder(RefundOrderBean refundOrderBean) throws RefundOrderException{
+		// TODO Auto-generated method stub
+		PojoTxnsOrderinfo orderinfo_old = null;
+		if(StringUtils.isNotEmpty(refundOrderBean.getOrigTN())){
+			orderinfo_old = txnsOrderinfoDAO.getOrderinfoByTN(refundOrderBean.getOrigTN());
+		}else{
+			orderinfo_old = txnsOrderinfoDAO.getOrderinfoByOrderNoAndMerchNo(refundOrderBean.getOrigOrderId(), refundOrderBean.getMerId());
+		}
+		if (orderinfo_old == null) {
+			throw new RefundOrderException("OD031");
+		}
+
+		PojoTxnsLog old_txnsLog = txnsLogDAO.getTxnsLogByTxnseqno(orderinfo_old.getRelatetradetxn());
+		if (old_txnsLog == null) {
+			throw new RefundOrderException("OD032");
+		}
+
+		// /判断交易时间是否超过期限
+		String txnDateTime = old_txnsLog.getAccordfintime();// 交易完成时间作为判断依据
+		Date txnDate = DateUtil.parse(DateUtil.DEFAULT_DATE_FROMAT, txnDateTime);
+		Date failureDateTime = DateUtil.skipDateTime(txnDate,
+				Integer.valueOf(Constant.getInstance().getRefund_day()));// 失效的日期
+		Calendar first_date = Calendar.getInstance();
+		first_date.setTime(new Date());
+		Calendar d_end = Calendar.getInstance();
+		d_end.setTime(failureDateTime);
+		logger.info("trade date:"
+				+ DateUtil.formatDateTime(DateUtil.SIMPLE_DATE_FROMAT, txnDate));
+		logger.info("first_date date:"
+				+ DateUtil.formatDateTime(DateUtil.SIMPLE_DATE_FROMAT,
+						first_date.getTime()));
+		logger.info("d_end(trade failure) date:"
+				+ DateUtil.formatDateTime(DateUtil.SIMPLE_DATE_FROMAT,
+						failureDateTime));
+
+		if (!DateUtil.calendarCompare(first_date, d_end)) {
+			throw new RefundOrderException("OD033");
+		}
+
+		try {
+			Long old_amount = orderinfo_old.getOrderamt();
+			Long refund_amount = Long.valueOf(refundOrderBean.getTxnAmt());
+			if (refund_amount > old_amount) {
+				throw new RefundOrderException("T021");
+			} else if (refund_amount == old_amount) {// 原始订单退款(全额退款)
+				// 具体的处理方法暂时不明
+			} else if (refund_amount < old_amount) {// 部分退款 支持
+
+			}
+			// 部分退款时校验t_txns_refund表中的正在审核或者已经退款的交易的金额之和
+			Long sumAmt = txnsRefundDAO.getSumAmtByOldTxnseqno(old_txnsLog
+					.getTxnseqno());
+			if ((sumAmt + refund_amount) > old_amount) {
+				logger.info("商户：" + refundOrderBean.getMerId() + "退款订单("
+						+ refundOrderBean.getOrderId() + ")退款金额之和大于原始订单金额");
+				throw new RefundOrderException("OD034");
+			}
+
+		} catch (NumberFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new RefundOrderException("OD035");
+		}
 	}
 
 }

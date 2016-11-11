@@ -8,7 +8,7 @@
  * Copyright (c) 2016,zlebank.All rights reserved.
  * 
  */
-package com.zlebank.zplatform.order.producer;
+package com.zlebank.zplatform.order.producer.spring;
 
 import java.util.List;
 import java.util.Random;
@@ -43,18 +43,23 @@ import com.zlebank.zplatform.order.producer.redis.RedisFactory;
  * @since 
  */
 
-public class SimpleOrderProducer implements Producer{
-	private final static Logger logger = LoggerFactory.getLogger(SimpleOrderProducer.class);
+public class SimpleOrderSpringProducer implements Producer{
+	private final static Logger logger = LoggerFactory.getLogger(SimpleOrderSpringProducer.class);
 	private static final String KEY = "SIMPLEORDER:";
 	private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer_order");
 	//RocketMQ消费者客户端
 	private DefaultMQProducer producer;
 	//主题
 	private String topic;
-		
+	private String namesrvAddr;
 	
-	public SimpleOrderProducer(String namesrvAddr) throws MQClientException{
+
+
+	public void init() throws MQClientException{
 		logger.info("【初始化SimpleOrderProducer】");
+		if(StringUtils.isEmpty(namesrvAddr)){
+			namesrvAddr = RESOURCE.getString("single.namesrv.addr");
+		}
 		logger.info("【namesrvAddr】"+namesrvAddr);
 		producer = new DefaultMQProducer(RESOURCE.getString("simple.order.producer.group"));
 		producer.setNamesrvAddr(namesrvAddr);
@@ -62,8 +67,7 @@ public class SimpleOrderProducer implements Producer{
         producer.setInstanceName(RESOURCE.getString("simple.order.instancename")+random.nextInt(9999));
         topic = RESOURCE.getString("simple.order.subscribe");
         logger.info("【初始化SimpleOrderProducer结束】");
-        
-       
+        producer.start();
 	}
 	
 	
@@ -80,7 +84,7 @@ public class SimpleOrderProducer implements Producer{
 		if(producer==null){
 			throw new MQClientException(-1,"未创建SimpleOrderProducer");
 		}
-		producer.start();
+		
 		Message msg = new Message(topic, tags.getCode(), JSON.toJSONString(message).getBytes(Charsets.UTF_8));
 		producer.send(msg,sendCallback);
 	}
@@ -101,7 +105,6 @@ public class SimpleOrderProducer implements Producer{
 		if(producer==null){
 			throw new MQClientException(-1,"SimpleOrderProducer为空");
 		}
-		producer.start();
 		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
 		producer.send(msg,sendCallback);
 	}
@@ -124,7 +127,7 @@ public class SimpleOrderProducer implements Producer{
 		if(producer==null){
 			throw new MQClientException(-1,"SimpleOrderProducer为空");
 		}
-		producer.start();
+		
 		Message msg = new Message(topic, tags.getCode(), message.getBytes(Charsets.UTF_8));
 		SendResult sendResult = producer.send(msg);
 		return sendResult;
@@ -147,7 +150,7 @@ public class SimpleOrderProducer implements Producer{
 		logger.info("【SimpleOrderCallback receive Result message】{}",JSON.toJSONString(sendResult));
 		logger.info("msgID:{}",sendResult.getMsgId());
 		
-		for (int i = 0;i<100;i++) {
+		for (int i = 0;i<1;i++) {
 			String tn = getTnByCycle(sendResult.getMsgId());
 			logger.info("从redis中取得key【{}】值为{}",KEY+sendResult.getMsgId(),tn);
 			if(StringUtils.isNotEmpty(tn)){
@@ -170,13 +173,15 @@ public class SimpleOrderProducer implements Producer{
 	private String getTnByCycle(String msgId){
 		Jedis jedis = RedisFactory.getInstance().getRedis();
 		//String tn = jedis.get(KEY+msgId);
-		List<String> brpop = jedis.brpop(40000, KEY+msgId);
-		logger.info(JSON.toJSONString(brpop));
-		String tn = brpop.get(1);
-		jedis.close();
-		if(StringUtils.isNotEmpty(tn)){
-			return tn;
+		List<String> brpop = jedis.brpop(40, KEY+msgId);
+		if(brpop.size()>0){
+			String tn = brpop.get(1);
+			
+			if(StringUtils.isNotEmpty(tn)){
+				return tn;
+			}
 		}
+		jedis.close();
 		return null;
 	}
 	

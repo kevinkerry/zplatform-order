@@ -37,6 +37,7 @@ public class Constant {
 	private String instead_pay_realtime_start_time;
 	private String instead_pay_realtime_end_time;
 	private String zlebank_coopinsti_code;
+	private String refund_day;
     private boolean canRun;
     private String refresh_interval;
     private static Constant constant;
@@ -83,6 +84,7 @@ public class Constant {
 			instead_pay_realtime_start_time = prop.getProperty("instead_pay_realtime_start_time");
 			instead_pay_realtime_end_time = prop.getProperty("instead_pay_realtime_end_time");
 			zlebank_coopinsti_code =  prop.getProperty("zlebank_coopinsti_code");
+			refund_day = prop.getProperty("refund_day","180");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -162,6 +164,20 @@ public class Constant {
 	 */
 	public void setZlebank_coopinsti_code(String zlebank_coopinsti_code) {
 		this.zlebank_coopinsti_code = zlebank_coopinsti_code;
+	}
+
+	/**
+	 * @return the refund_day
+	 */
+	public String getRefund_day() {
+		return refund_day;
+	}
+
+	/**
+	 * @param refund_day the refund_day to set
+	 */
+	public void setRefund_day(String refund_day) {
+		this.refund_day = refund_day;
 	}
 	
 	

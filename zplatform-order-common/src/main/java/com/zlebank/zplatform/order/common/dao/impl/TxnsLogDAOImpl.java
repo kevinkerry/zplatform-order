@@ -13,8 +13,10 @@ package com.zlebank.zplatform.order.common.dao.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -78,5 +80,18 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<PojoTxnsLog> implements
     //    return li.get(0);
         
     }
+
+	/**
+	 *
+	 * @param txnseqno
+	 * @return
+	 */
+	@Override
+	@Transactional(readOnly=true)
+	public PojoTxnsLog getTxnsLogByTxnseqno(String txnseqno) {
+		Criteria criteria = getSession().createCriteria(PojoTxnsLog.class);
+		criteria.add(Restrictions.eq("txnseqno", txnseqno));
+		return (PojoTxnsLog) criteria.uniqueResult();
+	}
 
 }

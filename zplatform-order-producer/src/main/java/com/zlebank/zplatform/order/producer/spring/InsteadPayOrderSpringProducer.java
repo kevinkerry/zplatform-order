@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.producer.spring;
 
+import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 
@@ -56,6 +57,9 @@ public class InsteadPayOrderSpringProducer implements Producer {
 	
 	public void init() throws MQClientException{
 		logger.info("【初始化InsteadPayOrderProducer】");
+		if(StringUtils.isEmpty(namesrvAddr)){
+			namesrvAddr = RESOURCE.getString("single.namesrv.addr");
+		}
 		logger.info("【namesrvAddr】"+namesrvAddr);          
 		producer = new DefaultMQProducer(RESOURCE.getString("insteadpay.order.producer.group"));
 		producer.setNamesrvAddr(namesrvAddr);
@@ -142,7 +146,7 @@ public class InsteadPayOrderSpringProducer implements Producer {
 		logger.info("【InsteadPayOrderProducer receive Result message】{}",JSON.toJSONString(sendResult));
 		logger.info("msgID:{}",sendResult.getMsgId());
 		
-		for (int i = 0;i<100;i++) {
+		for (int i = 0;i<1;i++) {
 			String tn = getTnByCycle(sendResult.getMsgId());
 			logger.info("从redis中取得key【{}】值为{}",KEY+sendResult.getMsgId(),tn);
 			if(StringUtils.isNotEmpty(tn)){
@@ -152,7 +156,7 @@ public class InsteadPayOrderSpringProducer implements Producer {
 				return resultBean;
 			}else{
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(900);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -164,11 +168,16 @@ public class InsteadPayOrderSpringProducer implements Producer {
 	}
 	private String getTnByCycle(String msgId){
 		Jedis jedis = RedisFactory.getInstance().getRedis();
-		String tn = jedis.get(KEY+msgId);
-		jedis.close();
-		if(StringUtils.isNotEmpty(tn)){
-			return tn;
+		//String tn = jedis.get(KEY+msgId);
+		List<String> brpop = jedis.brpop(40, KEY+msgId);
+		if(brpop.size()>0){
+			String tn = brpop.get(1);
+			
+			if(StringUtils.isNotEmpty(tn)){
+				return tn;
+			}
 		}
+		jedis.close();
 		return null;
 	}
 }

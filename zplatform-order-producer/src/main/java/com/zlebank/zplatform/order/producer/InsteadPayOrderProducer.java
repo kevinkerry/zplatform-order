@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.producer;
 
+import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 
@@ -137,7 +138,7 @@ public class InsteadPayOrderProducer implements Producer {
 		logger.info("【InsteadPayOrderProducer receive Result message】{}",JSON.toJSONString(sendResult));
 		logger.info("msgID:{}",sendResult.getMsgId());
 		
-		for (int i = 0;i<100;i++) {
+		for (int i = 0;i<1;i++) {
 			String tn = getTnByCycle(sendResult.getMsgId());
 			logger.info("从redis中取得key【{}】值为{}",KEY+sendResult.getMsgId(),tn);
 			if(StringUtils.isNotEmpty(tn)){
@@ -159,7 +160,9 @@ public class InsteadPayOrderProducer implements Producer {
 	}
 	private String getTnByCycle(String msgId){
 		Jedis jedis = RedisFactory.getInstance().getRedis();
-		String tn = jedis.get(KEY+msgId);
+		//String tn = jedis.get(KEY+msgId);
+		List<String> brpop = jedis.brpop(40000, KEY+msgId);
+		String tn = brpop.get(1);
 		jedis.close();
 		if(StringUtils.isNotEmpty(tn)){
 			return tn;
