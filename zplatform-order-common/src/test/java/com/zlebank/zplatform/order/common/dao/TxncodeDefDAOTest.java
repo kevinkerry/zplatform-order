@@ -17,7 +17,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.alibaba.fastjson.JSON;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxncodeDef;
+import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 
 /**
  * Class Description

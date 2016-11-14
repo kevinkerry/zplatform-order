@@ -11,14 +11,14 @@
 package com.zlebank.zplatform.order.service;
 
 import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
-import com.zlebank.zplatform.order.common.bean.OrderBean;
-import com.zlebank.zplatform.order.common.bean.OrderInfoBean;
-import com.zlebank.zplatform.order.common.bean.RefundOrderBean;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
-import com.zlebank.zplatform.order.common.exception.CommonException;
-import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
-import com.zlebank.zplatform.order.common.exception.RefundOrderException;
+import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
+import com.zlebank.zplatform.order.bean.OrderBean;
+import com.zlebank.zplatform.order.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.bean.RefundOrderBean;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
+import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.exception.RefundOrderException;
 
 /**
  * Class Description

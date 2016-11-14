@@ -10,8 +10,8 @@
  */
 package com.zlebank.zplatform.order.service;
 
-import com.zlebank.zplatform.order.common.bean.OrderBean;
-import com.zlebank.zplatform.order.common.exception.CommonException;
+import com.zlebank.zplatform.order.bean.OrderBean;
+import com.zlebank.zplatform.order.exception.CommonException;
 
 /**
  * Class Description

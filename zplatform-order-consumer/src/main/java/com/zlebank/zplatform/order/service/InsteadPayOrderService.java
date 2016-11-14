@@ -10,10 +10,10 @@
  */
 package com.zlebank.zplatform.order.service;
 
-import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
-import com.zlebank.zplatform.order.common.bean.ResultBean;
-import com.zlebank.zplatform.order.common.exception.CommonException;
-import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
+import com.zlebank.zplatform.order.bean.ResultBean;
+import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 
 /**
  * 代付订单接口

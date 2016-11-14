@@ -13,26 +13,27 @@ package com.zlebank.zplatform.order.service.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
-import com.zlebank.zplatform.order.common.bean.OrderBean;
-import com.zlebank.zplatform.order.common.bean.RefundOrderBean;
-import com.zlebank.zplatform.order.common.dao.TxncodeDefDAO;
-import com.zlebank.zplatform.order.common.dao.TxnsLogDAO;
-import com.zlebank.zplatform.order.common.dao.TxnsOrderinfoDAO;
-import com.zlebank.zplatform.order.common.dao.TxnsRefundDAO;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxncodeDef;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsLog;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsOrderinfo;
-import com.zlebank.zplatform.order.common.dao.pojo.PojoTxnsRefund;
-import com.zlebank.zplatform.order.common.exception.CommonException;
-import com.zlebank.zplatform.order.common.exception.RefundOrderException;
-import com.zlebank.zplatform.order.common.sequence.SerialNumberService;
-import com.zlebank.zplatform.order.common.utils.Constant;
+import com.zlebank.zplatform.order.bean.OrderBean;
+import com.zlebank.zplatform.order.bean.RefundOrderBean;
+import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
+import com.zlebank.zplatform.order.dao.TxnsLogDAO;
+import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
+import com.zlebank.zplatform.order.dao.TxnsRefundDAO;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
+import com.zlebank.zplatform.order.dao.pojo.PojoTxnsRefund;
+import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.exception.RefundOrderException;
+import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.RefundOrderService;
+import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IMerchService;
@@ -48,6 +49,7 @@ import com.zlebank.zplatform.trade.utils.DateUtil;
  * @date 2016年11月11日 下午1:58:55
  * @since
  */
+@Service("refundOrderService")
 public class RefundOrderServiceImpl implements RefundOrderService {
 
 	@Autowired
@@ -97,14 +99,14 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 
 		commonOrderService.checkOldOrder(refundOrderBean);
 
+		
 		try {
-			commonRefund(refundOrderBean);
+			return commonRefund(refundOrderBean);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			throw new RefundOrderException("OD036");
 		}
-
-		return null;
 	}
 
 	public String commonRefund(RefundOrderBean orderBean)
@@ -115,7 +117,7 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		PojoTxnsLog old_txnsLog = null;
 
 		old_orderInfo = txnsOrderinfoDAO.getOrderinfoByTN(orderBean
-				.getOrigOrderId());
+				.getOrigTN());
 		old_txnsLog = txnsLogDAO.getTxnsLogByTxnseqno(old_orderInfo
 				.getRelatetradetxn());
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
@@ -211,7 +213,7 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 
 		// 保存订单信息
 		orderinfo = new PojoTxnsOrderinfo();
-		orderinfo.setId(RandomUtils.nextLong());
+		orderinfo.setId(Long.valueOf(RandomUtils.nextInt()));
 		// orderinfo.setInstitution(member.getMerchinsti());
 		orderinfo.setOrderno(orderBean.getOrderId());// 商户提交的订单号
 		orderinfo.setOrderamt(Long.valueOf(orderBean.getTxnAmt()));

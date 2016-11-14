@@ -24,11 +24,11 @@ import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import com.google.common.base.Charsets;
-import com.zlebank.zplatform.order.common.bean.InsteadPayOrderBean;
-import com.zlebank.zplatform.order.common.bean.ResultBean;
-import com.zlebank.zplatform.order.common.exception.CommonException;
-import com.zlebank.zplatform.order.common.exception.InsteadPayOrderException;
+import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
+import com.zlebank.zplatform.order.bean.ResultBean;
 import com.zlebank.zplatform.order.consumer.enums.OrderTagsEnum;
+import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.service.InsteadPayOrderService;
 import com.zlebank.zplatform.order.service.OrderCacheResultService;
 
