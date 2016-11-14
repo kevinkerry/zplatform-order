@@ -15,10 +15,12 @@ import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
+import com.zlebank.zplatform.order.bean.WithdrawBean;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
+import com.zlebank.zplatform.order.exception.WithdrawOrderException;
 
 /**
  * Class Description
@@ -155,4 +157,19 @@ public interface CommonOrderService {
      * @param refundOrderBean
      */
     public void checkOldOrder(RefundOrderBean refundOrderBean) throws RefundOrderException;
+    
+    /**
+     * 校验提现订单的唯一性
+     * @param withdrawBean 提现订单bean
+     * @throws WithdrawOrderException
+     */
+    public void verifyRepeatWithdrawOrder(WithdrawBean withdrawBean) throws WithdrawOrderException;
+    
+    /**
+     * 检查提现会员账户
+     * @param memberId 会员号
+     * @param txnAmt 交易金额
+     * @throws WithdrawOrderException
+     */
+    public void checkBusiAcctOfWithdraw(String memberId,String txnAmt) throws WithdrawOrderException;
 }

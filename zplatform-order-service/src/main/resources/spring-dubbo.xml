@@ -7,4 +7,6 @@
 
 	<dubbo:reference id="insteadPayAccountingService" interface="com.zlebank.zplatform.trade.acc.service.InsteadPayAccountingService" version="1.0" retries="0"/>
 	<dubbo:reference id="refundAccountingService" interface="com.zlebank.zplatform.trade.acc.service.RefundAccountingService" version="1.0" retries="0"/>
+	<dubbo:reference id="withdrawAccountingService" interface="com.zlebank.zplatform.trade.acc.service.WithdrawAccountingService" version="1.0" retries="0"/>
+	
 </beans>

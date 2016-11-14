@@ -42,6 +42,7 @@ import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.bean.ResultBean;
+import com.zlebank.zplatform.order.bean.WithdrawBean;
 import com.zlebank.zplatform.order.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
@@ -58,6 +59,7 @@ import com.zlebank.zplatform.order.enums.ExceptionTypeEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
+import com.zlebank.zplatform.order.exception.WithdrawOrderException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.order.utils.DateUtil;
@@ -623,5 +625,47 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			throw new RefundOrderException("OD035");
 		}
 	}
-
+	@Override
+	public void verifyRepeatWithdrawOrder(WithdrawBean withdrawBean) throws WithdrawOrderException {
+		// TODO Auto-generated method stub
+		OrderInfoBean orderInfo = getOrderinfoByOrderNoAndMerchNo(withdrawBean.getOrderId(), withdrawBean.getMerId());
+		if (orderInfo != null) {
+			if ("00".equals(orderInfo.getStatus())) {// 交易成功订单不可二次支付
+				throw new WithdrawOrderException("OD029");
+			}
+			if ("02".equals(orderInfo.getStatus())) {
+				throw new WithdrawOrderException("OD030");
+			}
+			if ("04".equals(orderInfo.getStatus())) {
+				throw new WithdrawOrderException("OD003");
+			}
+		}
+	}
+	
+	@Override
+	public void checkBusiAcctOfWithdraw(String memberId,String txnAmt) throws WithdrawOrderException{
+		MemberBean member = new MemberBean();
+		member.setMemberId(memberId);
+		MemberAccountBean memberAccountBean = null;
+		try {
+			memberAccountBean = memberAccountService.queryBalance(MemberType.INDIVIDUAL, member, Usage.BASICPAY);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			throw new WithdrawOrderException("OD012");
+		}
+		if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.STOP_OUT) {
+			//throw new TradeException("GW05");
+			throw new WithdrawOrderException("OD014");
+		}
+		
+		// 商户余额是否足够
+        BigDecimal payBalance = new BigDecimal(txnAmt);
+       
+        BigDecimal merBalance = memberAccountBean != null ? memberAccountBean.getBalance() : BigDecimal.ZERO;
+        if (merBalance.compareTo(payBalance) < 0) {
+        	throw new WithdrawOrderException("OD023");
+        }
+	}
 }

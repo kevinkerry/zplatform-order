@@ -31,7 +31,9 @@ public enum OrderTagsEnum {
 	/**实时代付订单*/
 	INSTEADPAY_REALTIME("TAG_005"),
 	/**退款订单**/
-	REFUND_SIMPLIFIED("TAG_006");
+	REFUND_SIMPLIFIED("TAG_006"),
+	/**提现订单*/
+	WITHDRAW_SIMPLIFIED("TAG_007");
 	private String code;
 
 	/**
