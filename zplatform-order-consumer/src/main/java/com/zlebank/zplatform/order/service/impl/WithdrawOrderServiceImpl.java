@@ -40,6 +40,9 @@ import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.WithdrawOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
+import com.zlebank.zplatform.risk.bean.RiskBean;
+import com.zlebank.zplatform.risk.exception.TradeRiskException;
+import com.zlebank.zplatform.risk.service.TradeRiskControlService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IMemberBankCardService;
@@ -81,6 +84,8 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 	private TxnsWithdrawDAO txnsWithdrawDAO;
 	@Autowired
 	private WithdrawAccountingService withdrawAccountingService;
+	@Autowired
+	private TradeRiskControlService tradeRiskControlService;
 	/**
 	 *
 	 * @param withdrawBean
@@ -93,14 +98,14 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		if (StringUtil.isNotEmpty(withdrawBean.getBindId())) {// 使用已绑定的卡进行提现
 			QuickpayCustBean custCard = memberBankCardService.getMemberBankCardById(Long.valueOf(withdrawBean.getBindId()));
 			if (custCard == null) {
-				throw new WithdrawOrderException("GW13");
+				throw new WithdrawOrderException("OD039");
 			}
 			accBean = new WithdrawAccBean(custCard);
 		} else {
 			accBean = JSON.parseObject(withdrawBean.getCardData(),WithdrawAccBean.class);
 		}
 		if (accBean == null) {
-			throw new WithdrawOrderException("GW14");
+			throw new WithdrawOrderException("OD040");
 		}
 		
 		commonOrderService.verifyRepeatWithdrawOrder(withdrawBean);
@@ -113,10 +118,12 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		
 		try {
 			return saveWithdrawOrder(withdrawBean,accBean);
+		}catch(TradeRiskException e){
+			throw new WithdrawOrderException("OD037");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new WithdrawOrderException("");
+			throw new WithdrawOrderException("OD038");
 		}
 	}
 
@@ -124,9 +131,10 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 	 * @param withdrawBean
 	 * @param accBean
 	 * @throws WithdrawOrderException 
+	 * @throws TradeRiskException 
 	 */
 	public String saveWithdrawOrder(WithdrawBean withdrawBean,
-			WithdrawAccBean accBean) throws WithdrawOrderException {
+			WithdrawAccBean accBean) throws WithdrawOrderException, TradeRiskException {
 		// TODO Auto-generated method stub
 		// 记录订单信息
 		PojoTxnsOrderinfo orderinfo = null;
@@ -217,14 +225,26 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		withdraw.setTexnseqno(txnsLog.getTxnseqno());
 		withdraw.setFee(txnsLog.getTxnfee());
 		txnsWithdrawDAO.saveTxnsWithdraw(withdraw);
+		// 风控
+		RiskBean riskBean = new RiskBean();
+		riskBean.setBusiCode(txnsLog.getBusicode());
+		riskBean.setCardNo(accBean.getAccNo());
+		riskBean.setCardType("1");
+		riskBean.setCoopInstId(txnsLog.getAccfirmerno());
+		riskBean.setMemberId(txnsLog.getAccmemberid());
+		riskBean.setMerchId(txnsLog.getAccsecmerno());
+		riskBean.setTxnAmt(txnsLog.getAmount()+"");
+		riskBean.setTxnseqno(txnsLog.getTxnseqno());
+		tradeRiskControlService.realTimeTradeRiskControl(riskBean);
 		ResultBean resultBean = withdrawAccountingService.withdrawApply(txnsLog.getTxnseqno());
+		
+		
 		if(resultBean.isResultBool()){
 			return orderinfo.getTn();
 		}else{
 			throw new WithdrawOrderException("");
 		}
-		// 风控
-
+		
 		
 		/*txnsLogService.tradeRiskControl(txnsLog.getTxnseqno(),
 				txnsLog.getAccfirmerno(), txnsLog.getAccsecmerno(),

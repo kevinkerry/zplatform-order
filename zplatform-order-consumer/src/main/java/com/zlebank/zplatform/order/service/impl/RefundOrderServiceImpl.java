@@ -34,6 +34,9 @@ import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.RefundOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
+import com.zlebank.zplatform.risk.bean.RiskBean;
+import com.zlebank.zplatform.risk.exception.TradeRiskException;
+import com.zlebank.zplatform.risk.service.TradeRiskControlService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
 import com.zlebank.zplatform.rmi.member.ICoopInstiService;
 import com.zlebank.zplatform.rmi.member.IMerchService;
@@ -72,7 +75,8 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 	private TxnsRefundDAO txnsRefundDAO;
 	@Autowired
 	private RefundAccountingService refundAccountingService;
-
+	@Autowired
+	private TradeRiskControlService tradeRiskControlService;
 	/**
 	 *
 	 * @param refundOrderBean
@@ -102,7 +106,10 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		
 		try {
 			return commonRefund(refundOrderBean);
-		} catch (Exception e) {
+		} catch (TradeRiskException e) {
+			// TODO: handle exception
+			throw new RefundOrderException("OD037");
+		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new RefundOrderException("OD036");
@@ -110,7 +117,7 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 	}
 
 	public String commonRefund(RefundOrderBean orderBean)
-			throws RefundOrderException,Exception {
+			throws RefundOrderException, TradeRiskException {
 		PojoMerchDeta member = null;
 		PojoTxnsLog txnsLog = null;
 		PojoTxnsOrderinfo old_orderInfo = null;
@@ -237,7 +244,17 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		orderinfo.setCurrencycode("156");
 
 		// txnsLogDAO.tradeRiskControl(txnsLog.getTxnseqno(),txnsLog.getAccfirmerno(),txnsLog.getAccsecmerno(),txnsLog.getAccmemberid(),txnsLog.getBusicode(),txnsLog.getAmount()+"","1","");
-
+		
+		RiskBean riskBean = new RiskBean();
+		riskBean.setBusiCode(txnsLog.getBusicode());
+		riskBean.setCardNo("");
+		riskBean.setCardType("1");
+		riskBean.setCoopInstId(txnsLog.getAccfirmerno());
+		riskBean.setMemberId(txnsLog.getAccmemberid());
+		riskBean.setMerchId(txnsLog.getAccsecmerno());
+		riskBean.setTxnAmt(txnsLog.getAmount()+"");
+		riskBean.setTxnseqno(txnsLog.getTxnseqno());
+		tradeRiskControlService.realTimeTradeRiskControl(riskBean);
 		txnsOrderinfoDAO.saveOrderInfo(orderinfo);
 		tn = orderinfo.getTn();
 
