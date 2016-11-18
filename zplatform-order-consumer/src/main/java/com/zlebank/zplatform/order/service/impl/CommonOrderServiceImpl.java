@@ -25,23 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
 import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.commons.dao.CardBinDao;
 import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.bean.CoopInsti;
-import com.zlebank.zplatform.member.bean.FinanceProductAccountBean;
-import com.zlebank.zplatform.member.bean.FinanceProductQueryBean;
-import com.zlebank.zplatform.member.bean.MemberAccountBean;
-import com.zlebank.zplatform.member.bean.MemberBean;
-import com.zlebank.zplatform.member.bean.enums.MemberType;
-import com.zlebank.zplatform.member.pojo.PojoMember;
-import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
+import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
+import com.zlebank.zplatform.member.individual.bean.MemberBean;
+import com.zlebank.zplatform.member.individual.bean.PoMemberBean;
+import com.zlebank.zplatform.member.individual.bean.enums.MemberType;
+import com.zlebank.zplatform.member.individual.service.MemberAccountService;
+import com.zlebank.zplatform.member.individual.service.MemberService;
+import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
+import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
-import com.zlebank.zplatform.order.bean.ResultBean;
 import com.zlebank.zplatform.order.bean.WithdrawBean;
 import com.zlebank.zplatform.order.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.dao.ProdCaseDAO;
@@ -54,8 +54,7 @@ import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
-import com.zlebank.zplatform.order.enums.AccountTypeEnum;
-import com.zlebank.zplatform.order.enums.ExceptionTypeEnum;
+import com.zlebank.zplatform.order.enums.BusinessEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
@@ -63,14 +62,6 @@ import com.zlebank.zplatform.order.exception.WithdrawOrderException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.order.utils.DateUtil;
-import com.zlebank.zplatform.rmi.member.ICoopInstiService;
-import com.zlebank.zplatform.rmi.member.IFinanceProductAccountService;
-import com.zlebank.zplatform.rmi.member.IMemberAccountService;
-import com.zlebank.zplatform.rmi.member.IMemberService;
-import com.zlebank.zplatform.rmi.member.IMerchService;
-import com.zlebank.zplatform.trade.bean.enums.BusinessEnum;
-import com.zlebank.zplatform.trade.model.TxnsLogModel;
-import com.zlebank.zplatform.trade.model.TxnsOrderinfoModel;
 
 /**
  * Class Description
@@ -92,17 +83,17 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	@Autowired
 	private ProdCaseDAO prodCaseDAO;
 	@Autowired
-	private IMerchService merchService;
+	private MerchService merchService;
 	@Autowired
-	private IMemberService memberService;
+	private MemberService memberService;
 	@Autowired
-	private ICoopInstiService coopInstiService;
+	private CoopInstiService coopInstiService;
 	@Autowired
-	private IMemberAccountService memberAccountService;
+	private MemberAccountService memberAccountService;
 	@Autowired
 	private TxnsLogDAO txnsLogDAO;
-	@Autowired
-	private IFinanceProductAccountService financeProductAccountService;
+	//@Autowired
+	//private FinanceProductAccountService financeProductAccountService;
 	@Autowired
 	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
 	@Autowired
@@ -166,19 +157,24 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	public void verifyBusiness(OrderBean orderBean) throws CommonException {
 		// TODO Auto-generated method stub
         PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(orderBean.getTxnType(), orderBean.getTxnSubType(), orderBean.getBizType());
+        if(busiModel==null){
+        	throw new CommonException("OD045", "订单交易类型错误");
+        }
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
-        
         if(busiTypeEnum==BusiTypeEnum.consumption){//消费
         	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
         	if(StringUtil.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
-        	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
+        	if(member==null){
+        		throw new CommonException("OD009", "商户不存在");
+        	}
         	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             if(prodCase==null){
                 throw new CommonException("OD005", "商户未开通此业务");
             }
-            if(BusinessEnum.CONSUMEQUICK_PRODUCT==businessEnum){//产品消费业务
+            /*if(BusinessEnum.CONSUMEQUICK_PRODUCT==businessEnum){//产品消费业务
             	FinanceProductQueryBean financeProductQueryBean = new FinanceProductQueryBean();
             	financeProductQueryBean.setProductCode(orderBean.getProductcode());
             	try {
@@ -191,7 +187,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 					e.printStackTrace();
 					throw new CommonException("OD007", "产品不存在");
 				}
-            }
+            }*/
         }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
         	//个人充值
         	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
@@ -199,7 +195,10 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			}
         	//商户充值
         	if (StringUtil.isNotEmpty(orderBean.getMerId())){
-        		PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		if(member==null){
+            		throw new CommonException("OD009", "商户不存在");
+            	}
             	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             	 if(prodCase==null){
                      throw new CommonException("OD005", "商户未开通此业务");
@@ -213,7 +212,10 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			}
         	//商户提现
         	if (StringUtil.isNotEmpty(orderBean.getMerId())){
-        		PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		if(member==null){
+            		throw new CommonException("OD009", "商户不存在");
+            	}
             	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             	 if(prodCase==null){
                      throw new CommonException("OD005", "商户未开通此业务");
@@ -223,7 +225,10 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         	if(StringUtil.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
-        	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	if(member==null){
+        		throw new CommonException("OD009", "商户不存在");
+        	}
         	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             if(prodCase==null){
                 throw new CommonException("OD005", "商户未开通此业务");
@@ -233,7 +238,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         	if(StringUtil.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
-        	PojoMerchDeta member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
             if(prodCase==null){
                 throw new CommonException("OD005", "商户未开通此业务");
@@ -255,11 +260,11 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 		// TODO Auto-generated method stub
 		// 检验一级商户和二级商户有效性
         if (StringUtil.isNotEmpty(merchant)) {
-            PojoMerchDeta subMember = merchService.getMerchBymemberId(merchant);
+            MerchantBean subMember = merchService.getMerchBymemberId(merchant);
             if (subMember == null) {
             	throw new CommonException("OD009", "商户不存在");
             }
-            PojoMember pojoMember = memberService.getMbmberByMemberId(merchant, null);
+            PoMemberBean pojoMember = memberService.getMbmberByMemberId(merchant, null);
             //校验商户会员信息 
             if (pojoMember.getMemberType()==MemberType.ENTERPRISE) {// 对于企业会员需要进行检查
             	CoopInsti pojoCoopInsti = coopInstiService.getInstiByInstiID(pojoMember.getInstiId());

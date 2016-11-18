@@ -12,7 +12,7 @@ package com.zlebank.zplatform.order.bean;
 
 import java.io.Serializable;
 
-import com.zlebank.zplatform.member.bean.QuickpayCustBean;
+import com.zlebank.zplatform.member.individual.bean.QuickpayCustBean;
 
 /**
  * Class Description

@@ -17,7 +17,13 @@ import org.springframework.stereotype.Service;
 
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.fee.bean.FeeBean;
+import com.zlebank.zplatform.fee.exception.TradeFeeException;
+import com.zlebank.zplatform.fee.service.TradeFeeService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
+import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
+import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
@@ -28,21 +34,18 @@ import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsRefund;
+import com.zlebank.zplatform.order.enums.BusinessEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
 import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.RefundOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
+import com.zlebank.zplatform.order.utils.DateUtil;
 import com.zlebank.zplatform.risk.bean.RiskBean;
 import com.zlebank.zplatform.risk.exception.TradeRiskException;
 import com.zlebank.zplatform.risk.service.TradeRiskControlService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiService;
-import com.zlebank.zplatform.rmi.member.IMerchService;
 import com.zlebank.zplatform.trade.acc.service.RefundAccountingService;
-import com.zlebank.zplatform.trade.bean.enums.BusinessEnum;
-import com.zlebank.zplatform.trade.utils.DateUtil;
 
 /**
  * Class Description
@@ -64,19 +67,21 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 	@Autowired
 	private TxncodeDefDAO txncodeDefDAO;
 	@Autowired
-	private IMerchService merchService;
+	private MerchService merchService;
 	@Autowired
-	private ICoopInstiProductService coopInstiProductService;
+	private CoopInstiProductService coopInstiProductService;
 	@Autowired
 	private SerialNumberService serialNumberService;
 	@Autowired
-	private ICoopInstiService coopInstiService;
+	private CoopInstiService coopInstiService;
 	@Autowired
 	private TxnsRefundDAO txnsRefundDAO;
 	@Autowired
 	private RefundAccountingService refundAccountingService;
 	@Autowired
 	private TradeRiskControlService tradeRiskControlService;
+	@Autowired
+	private TradeFeeService tradeFeeService;
 	/**
 	 *
 	 * @param refundOrderBean
@@ -118,7 +123,7 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 
 	public String commonRefund(RefundOrderBean orderBean)
 			throws RefundOrderException, TradeRiskException {
-		PojoMerchDeta member = null;
+		MerchantBean member = null;
 		PojoTxnsLog txnsLog = null;
 		PojoTxnsOrderinfo old_orderInfo = null;
 		PojoTxnsLog old_txnsLog = null;
@@ -208,11 +213,29 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		 * }
 		 */
 		txnsLog.setTradcomm(0L);
+		
+		
+		long fee = 0;
+		try {
+			FeeBean feeBean = new FeeBean();
+			feeBean.setBusiCode(txnsLog.getBusicode());
+			feeBean.setFeeVer(txnsLog.getFeever());
+			feeBean.setTxnAmt(txnsLog.getAmount()+"");
+			feeBean.setMerchNo(txnsLog.getAccsecmerno());
+			feeBean.setCardType("");
+			feeBean.setTxnseqnoOg(txnsLog.getTxnseqnoOg());
+			fee = tradeFeeService.getRefundFee(feeBean);
+		} catch (TradeFeeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RefundOrderException("OD042");
+		}
+		txnsLog.setTxnfee(fee);
 		txnsLogDAO.saveTxnsLog(txnsLog);
 		com.zlebank.zplatform.trade.acc.bean.ResultBean resultBean = refundAccountingService
 				.refundApply(txnsLog.getTxnseqno());
 		if (!resultBean.isResultBool()) {
-			throw new RefundOrderException("");
+			throw new RefundOrderException("OD041");
 		}
 
 		String tn = "";
@@ -242,7 +265,6 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		orderinfo.setStatus("02");
 		orderinfo.setMemberid(orderBean.getMemberId());
 		orderinfo.setCurrencycode("156");
-
 		// txnsLogDAO.tradeRiskControl(txnsLog.getTxnseqno(),txnsLog.getAccfirmerno(),txnsLog.getAccsecmerno(),txnsLog.getAccmemberid(),txnsLog.getBusicode(),txnsLog.getAmount()+"","1","");
 		
 		RiskBean riskBean = new RiskBean();

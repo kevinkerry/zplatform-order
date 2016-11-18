@@ -19,15 +19,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.commons.dao.CardBinDao;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.bean.EnterpriseBean;
-import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
+import com.zlebank.zplatform.member.individual.service.MemberAccountService;
+import com.zlebank.zplatform.member.individual.service.MemberService;
+import com.zlebank.zplatform.member.merchant.bean.EnterpriseBean;
+import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
+import com.zlebank.zplatform.member.merchant.service.EnterpriseService;
+import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.ResultBean;
+import com.zlebank.zplatform.order.consumer.enums.TradeStatFlagEnum;
 import com.zlebank.zplatform.order.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.dao.TxnsLogDAO;
@@ -44,14 +50,7 @@ import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.InsteadPayOrderService;
 import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.order.utils.ValidateLocator;
-import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiService;
-import com.zlebank.zplatform.rmi.member.IEnterpriseService;
-import com.zlebank.zplatform.rmi.member.IMemberAccountService;
-import com.zlebank.zplatform.rmi.member.IMemberService;
-import com.zlebank.zplatform.rmi.member.IMerchService;
 import com.zlebank.zplatform.trade.acc.service.InsteadPayAccountingService;
-import com.zlebank.zplatform.trade.bean.enums.TradeStatFlagEnum;
 
 /**
  * Class Description
@@ -70,22 +69,22 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 	@Autowired
 	private TxncodeDefDAO txncodeDefDAO;
 	@Autowired
-	private ICoopInstiService coopInstiService ;
+	private CoopInstiService coopInstiService ;
 	@Autowired
-	private IMemberService memberService;
+	private MemberService memberService;
 	@Autowired
-	private IMemberAccountService memberAccountService;
+	private MemberAccountService memberAccountService;
 	
 	@Autowired
 	private InsteadPayRealtimeDAO insteadPayRealtimeDAO;
 	@Autowired
 	private SerialNumberService serialNumberService;
 	@Autowired
-	private IMerchService merchService;
+	private MerchService merchService;
 	@Autowired
-	private ICoopInstiProductService coopInstiProductService;
+	private CoopInstiProductService coopInstiProductService;
 	@Autowired
-	private IEnterpriseService enterpriseService;
+	private EnterpriseService enterpriseService;
 	@Autowired
 	private TxnsLogDAO txnsLogDAO;
 	@Autowired
@@ -186,7 +185,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 	}
 	
 	private PojoTxnsLog generateTxnsLog(InsteadPayOrderBean insteadPayOrderBean){
-		PojoMerchDeta member = merchService.getMerchBymemberId(insteadPayOrderBean.getMerId());
+		MerchantBean member = merchService.getMerchBymemberId(insteadPayOrderBean.getMerId());
 		PojoTxnsLog txnsLog = new PojoTxnsLog();
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
 				insteadPayOrderBean.getTxnType(), insteadPayOrderBean.getTxnSubType(),

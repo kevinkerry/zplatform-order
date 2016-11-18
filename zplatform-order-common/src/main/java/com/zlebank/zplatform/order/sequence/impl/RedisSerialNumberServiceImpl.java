@@ -39,7 +39,7 @@ public class RedisSerialNumberServiceImpl implements SerialNumberService {
 	private static final String TXNSEQNO_KEY="SEQUENCE:TXNSEQNO";
 	private static final String TN_KEY="SEQUENCE:TN";
 	private static final String REFUND_KEY="SEQUENCE:REFUND";
-
+	private static final String WITHDRAW_KEY="SEQUENCE:WITHDRAW";
 	public String generateTxnseqno() {
 		String seqNo = formateSequence(TXNSEQNO_KEY);
 		return seqNo.substring(0, 6) + "99" + seqNo.substring(6);
@@ -80,5 +80,15 @@ public class RedisSerialNumberServiceImpl implements SerialNumberService {
 	public String generateRefundNo() {
 		String seqNo = formateSequence(REFUND_KEY);
 		return seqNo.substring(0, 6) + "40" + seqNo.substring(6);
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public String generateWithdrawNo() {
+		String seqNo = formateSequence(WITHDRAW_KEY);
+		return seqNo.substring(0, 6) + "30" + seqNo.substring(6);
 	}
 }

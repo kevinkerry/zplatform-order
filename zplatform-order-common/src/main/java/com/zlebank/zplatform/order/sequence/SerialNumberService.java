@@ -38,4 +38,10 @@ public interface SerialNumberService {
 	 * @return
 	 */
 	public String generateRefundNo();
+	
+	/**
+	 * 生成提现订单号
+	 * @return
+	 */
+	public String generateWithdrawNo();
 }

@@ -10,25 +10,29 @@
  */
 package com.zlebank.zplatform.order.service.impl;
 
-import java.math.BigDecimal;
-
 import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.zlebank.zplatform.acc.bean.TradeInfo;
-import com.zlebank.zplatform.acc.service.entry.EntryEvent;
-import com.zlebank.zplatform.commons.enums.BusinessCodeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
+import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.bean.QuickpayCustBean;
-import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.fee.bean.FeeBean;
+import com.zlebank.zplatform.fee.exception.TradeFeeException;
+import com.zlebank.zplatform.fee.service.TradeFeeService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
+import com.zlebank.zplatform.member.individual.bean.QuickpayCustBean;
+import com.zlebank.zplatform.member.individual.service.MemberBankCardService;
+import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
+import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.WithdrawAccBean;
 import com.zlebank.zplatform.order.bean.WithdrawBean;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.dao.TxnsLogDAO;
+import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
 import com.zlebank.zplatform.order.dao.TxnsWithdrawDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
@@ -43,15 +47,8 @@ import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.risk.bean.RiskBean;
 import com.zlebank.zplatform.risk.exception.TradeRiskException;
 import com.zlebank.zplatform.risk.service.TradeRiskControlService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiService;
-import com.zlebank.zplatform.rmi.member.IMemberBankCardService;
-import com.zlebank.zplatform.rmi.member.IMerchService;
 import com.zlebank.zplatform.trade.acc.bean.ResultBean;
 import com.zlebank.zplatform.trade.acc.service.WithdrawAccountingService;
-import com.zlebank.zplatform.trade.model.TxnsOrderinfoModel;
-import com.zlebank.zplatform.trade.model.TxnsWithdrawModel;
-import com.zlebank.zplatform.trade.utils.DateUtil;
 
 /**
  * Class Description
@@ -65,27 +62,31 @@ import com.zlebank.zplatform.trade.utils.DateUtil;
 public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 	
 	@Autowired
-	private IMemberBankCardService memberBankCardService;
+	private MemberBankCardService memberBankCardService;
 	@Autowired
 	private CommonOrderService commonOrderService;
 	@Autowired
 	private TxncodeDefDAO txncodeDefDAO;
 	@Autowired
-	private IMerchService merchService;
+	private MerchService merchService;
 	@Autowired
-	private ICoopInstiProductService coopInstiProductService;
+	private CoopInstiProductService coopInstiProductService;
 	@Autowired
 	private SerialNumberService serialNumberService;
 	@Autowired
 	private TxnsLogDAO txnsLogDAO;
 	@Autowired
-	private ICoopInstiService coopInstiService;
+	private CoopInstiService coopInstiService;
 	@Autowired
 	private TxnsWithdrawDAO txnsWithdrawDAO;
 	@Autowired
 	private WithdrawAccountingService withdrawAccountingService;
 	@Autowired
 	private TradeRiskControlService tradeRiskControlService;
+	@Autowired
+	private TradeFeeService tradeFeeService;
+	@Autowired
+	private TxnsOrderinfoDAO txnsOrderinfoDAO;
 	/**
 	 *
 	 * @param withdrawBean
@@ -146,7 +147,7 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		// member = memberService.get(withdrawBean.getCoopInstiId());
 		txnsLog = new PojoTxnsLog();
 		if (StringUtil.isNotEmpty(withdrawBean.getMerId())) {// 商户为空时，取商户的各个版本信息
-			PojoMerchDeta member = merchService.getMerchBymemberId(withdrawBean
+			MerchantBean member = merchService.getMerchBymemberId(withdrawBean
 					.getMerId());
 			txnsLog.setRiskver(member.getRiskVer());
 			txnsLog.setSplitver(member.getSpiltVer());
@@ -192,7 +193,28 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		txnsLog.setAccordcommitime(withdrawBean.getTxnTime());
 		txnsLog.setTradestatflag("00000000");// 交易初始状态
 		txnsLog.setAccmemberid(withdrawBean.getMemberId());
+		txnsLog.setPan(accBean.getAccNo());
+		txnsLog.setPanName(accBean.getAccName());
+		txnsLog.setCardtype("1");
+		txnsLog.setCardinstino(accBean.getBankCode());
 		//txnsLog.setTxnfee(txnsLogService.getTxnFee(txnsLog));
+		long fee = 0;
+		try {
+			FeeBean feeBean = new FeeBean();
+			feeBean.setBusiCode(txnsLog.getBusicode());
+			feeBean.setFeeVer(txnsLog.getFeever());
+			feeBean.setTxnAmt(txnsLog.getAmount()+"");
+			feeBean.setMerchNo(txnsLog.getAccsecmerno());
+			feeBean.setCardType("1");
+			feeBean.setTxnseqnoOg("");
+			feeBean.setTxnseqno(txnsLog.getTxnseqno());
+			fee = tradeFeeService.getCommonFee(feeBean);
+		} catch (TradeFeeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new WithdrawOrderException("OD043");
+		}
+		txnsLog.setTxnfee(fee);
 		txnsLogDAO.saveTxnsLog(txnsLog);
 
 		
@@ -214,14 +236,15 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		orderinfo.setTxnsubtype(withdrawBean.getTxnSubType());
 		orderinfo.setBiztype(withdrawBean.getBizType());
 		orderinfo.setAccesstype(withdrawBean.getAccessType());
-		orderinfo.setTn(serialNumberService.generateTN(orderinfo.getMemberid()));
+		orderinfo.setTn(serialNumberService.generateTN(withdrawBean.getMemberId()));
 		orderinfo.setMemberid(withdrawBean.getMemberId());
 		orderinfo.setCurrencycode("156");
 		orderinfo.setStatus("02");
-
+		txnsOrderinfoDAO.saveOrderInfo(orderinfo);
 	
 	
 		PojoTxnsWithdraw withdraw = new PojoTxnsWithdraw(withdrawBean,accBean);
+		withdraw.setWithdraworderno(serialNumberService.generateWithdrawNo());
 		withdraw.setTexnseqno(txnsLog.getTxnseqno());
 		withdraw.setFee(txnsLog.getTxnfee());
 		txnsWithdrawDAO.saveTxnsWithdraw(withdraw);
@@ -242,7 +265,7 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 		if(resultBean.isResultBool()){
 			return orderinfo.getTn();
 		}else{
-			throw new WithdrawOrderException("");
+			throw new WithdrawOrderException("OD044");
 		}
 		
 		

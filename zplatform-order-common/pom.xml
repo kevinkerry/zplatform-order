@@ -24,11 +24,8 @@
 			<artifactId>zplatform-commons</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.zlebank.zplatform</groupId>
-			<artifactId>zplatform-remote-client</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+		<!-- <dependency> <groupId>com.zlebank.zplatform</groupId> <artifactId>zplatform-remote-client</artifactId> 
+			<version>1.0.0-SNAPSHOT</version> </dependency> -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-redis</artifactId>
@@ -120,6 +117,21 @@
 			<artifactId>cglib</artifactId>
 			<version>2.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.zlebank.zplatform</groupId>
+			<artifactId>zplatform-member-individual-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.zlebank.zplatform</groupId>
+			<artifactId>zplatform-member-coopinsti-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.zlebank.zplatform</groupId>
+			<artifactId>zplatform-member-merchant-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
-	
+
 </project>

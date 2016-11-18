@@ -27,6 +27,7 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import com.google.common.base.Charsets;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
+import com.zlebank.zplatform.order.bean.ResultBean;
 import com.zlebank.zplatform.order.bean.WithdrawBean;
 import com.zlebank.zplatform.order.consumer.enums.OrderTagsEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
@@ -34,8 +35,6 @@ import com.zlebank.zplatform.order.service.ConsumeOrderService;
 import com.zlebank.zplatform.order.service.OrderCacheResultService;
 import com.zlebank.zplatform.order.service.RefundOrderService;
 import com.zlebank.zplatform.order.service.WithdrawOrderService;
-import com.zlebank.zplatform.trade.bean.ResultBean;
-
 /**
  * Class Description
  *

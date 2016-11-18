@@ -11,7 +11,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
 import com.zlebank.zplatform.commons.utils.DateUtil;
-import com.zlebank.zplatform.trade.bean.wap.WapRefundBean;
 
 /**
  * TTxnsRefund entity. @author MyEclipse Persistence Tools
@@ -56,7 +55,7 @@ public class PojoTxnsRefund implements java.io.Serializable {
 	public PojoTxnsRefund() {
     }
 	
-	public PojoTxnsRefund(WapRefundBean refundBean,String oldtxnseqno,String oldamount,String reltxnseqno) {
+	/*public PojoTxnsRefund(WapRefundBean refundBean,String oldtxnseqno,String oldamount,String reltxnseqno) {
 	    
         this.oldorderno = refundBean.getOrigOrderId();
         this.oldtxnseqno = oldtxnseqno;
@@ -72,7 +71,7 @@ public class PojoTxnsRefund implements java.io.Serializable {
         
         this.status = "01";
         
-	}
+	}*/
 	
 	/** minimal constructor */
 	public PojoTxnsRefund(Long id, String refundorderno, String oldorderno,

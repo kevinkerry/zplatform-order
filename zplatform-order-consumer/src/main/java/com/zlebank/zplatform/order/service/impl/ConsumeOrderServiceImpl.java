@@ -16,12 +16,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.bean.enums.MemberType;
-import com.zlebank.zplatform.member.pojo.PojoMember;
-import com.zlebank.zplatform.member.pojo.PojoMerchDeta;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
+import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
+import com.zlebank.zplatform.member.individual.bean.MemberBean;
+import com.zlebank.zplatform.member.individual.bean.PoMemberBean;
+import com.zlebank.zplatform.member.individual.bean.enums.MemberType;
+import com.zlebank.zplatform.member.individual.service.MemberInfoService;
+import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
+import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
+import com.zlebank.zplatform.order.consumer.enums.TradeStatFlagEnum;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
@@ -29,12 +36,7 @@ import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.ConsumeOrderService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiProductService;
-import com.zlebank.zplatform.rmi.member.ICoopInstiService;
-import com.zlebank.zplatform.rmi.member.IMemberService;
-import com.zlebank.zplatform.rmi.member.IMerchService;
-import com.zlebank.zplatform.trade.bean.enums.TradeStatFlagEnum;
-import com.zlebank.zplatform.trade.utils.DateUtil;
+import com.zlebank.zplatform.order.utils.DateUtil;
 
 /**
  * Class Description
@@ -52,15 +54,15 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 	@Autowired
 	private SerialNumberService serialNumberService;
 	@Autowired
-	private ICoopInstiService coopInstiService;
+	private CoopInstiService coopInstiService;
 	@Autowired
-	private IMerchService merchService;
+	private MerchService merchService;
 	@Autowired
-	private IMemberService memberService;
+	private MemberInfoService memberInfoService;
 	@Autowired
 	private TxncodeDefDAO txncodeDefDAO;
 	@Autowired
-	private ICoopInstiProductService coopInstiProductService;
+	private CoopInstiProductService coopInstiProductService;
 
 	@Override
 	public void checkOrderInfo(OrderBean orderBean) throws CommonException {
@@ -122,7 +124,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 		orderinfo.setFirmemberno(orderBean.getCoopInstiId());
 		orderinfo.setFirmembername(coopInstiService.getInstiByInstiCode(
 				orderBean.getCoopInstiId()).getInstiName());
-		PojoMerchDeta merchant = merchService.getParentMerch(orderBean
+		MerchantBean merchant = merchService.getParentMerch(orderBean
 				.getMerId());
 		orderinfo.setSecmemberno(orderBean.getMerId());
 		orderinfo
@@ -153,7 +155,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 
 	private PojoTxnsLog generateTxnsLog(OrderBean orderBean) {
 		PojoTxnsLog txnsLog = new PojoTxnsLog();
-		PojoMerchDeta member = null;
+		MerchantBean member = null;
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
 				orderBean.getTxnType(), orderBean.getTxnSubType(),
 				orderBean.getBizType());
@@ -205,9 +207,8 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 			if ("999999999999999".equals(orderBean.getMemberId())) {
 				txnsLog.setAccmemberid("999999999999999");// 匿名会员号
 			} else {
-				PojoMember memberOfPerson = memberService.getMbmberByMemberId(
+				MemberBean memberOfPerson = memberInfoService.getMemberByMemberId(
 						orderBean.getMemberId(), MemberType.INDIVIDUAL);
-
 				if (memberOfPerson != null) {
 					txnsLog.setAccmemberid(orderBean.getMemberId());
 				} else {
