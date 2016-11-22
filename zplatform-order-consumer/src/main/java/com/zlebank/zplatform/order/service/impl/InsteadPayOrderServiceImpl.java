@@ -19,9 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zlebank.zplatform.commons.bean.CardBin;
+import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
 import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.commons.utils.StringUtil;
+import com.zlebank.zplatform.fee.bean.FeeBean;
+import com.zlebank.zplatform.fee.exception.TradeFeeException;
+import com.zlebank.zplatform.fee.service.TradeFeeService;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.service.MemberAccountService;
@@ -89,7 +93,8 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 	private TxnsLogDAO txnsLogDAO;
 	@Autowired
 	private InsteadPayAccountingService insteadPayAccountingService;
-	
+	@Autowired
+	private TradeFeeService tradeFeeService;
 	/**
 	 *
 	 * @param insteadPayOrderBean
@@ -124,6 +129,23 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		PojoTxnsLog txnsLog = generateTxnsLog(insteadPayOrderBean);
 		txnsLog.setTxnseqno(txnseqno);
 		insteadPayRealtimeDAO.saveInsteadTrade(insteadPayRealtime);
+		//计算交易手续费
+		try {
+			FeeBean feeBean = new FeeBean();
+			feeBean.setBusiCode(txnsLog.getBusicode());
+			feeBean.setFeeVer(txnsLog.getFeever());
+			feeBean.setTxnAmt(txnsLog.getAmount()+"");
+			feeBean.setMerchNo(txnsLog.getAccsecmerno());
+			feeBean.setCardType(insteadPayOrderBean.getCardType());
+			feeBean.setTxnseqnoOg("");
+			feeBean.setTxnseqno(txnseqno);
+			long fee = tradeFeeService.getCommonFee(feeBean);
+			txnsLog.setTxnfee(fee);
+		} catch (TradeFeeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new InsteadPayOrderException("OD048");
+		}
 		txnsLogDAO.saveTxnsLog(txnsLog);
 		com.zlebank.zplatform.trade.acc.bean.ResultBean paymentAccountingResult = insteadPayAccountingService.advancePaymentAccounting(txnseqno);
 		if(!paymentAccountingResult.isResultBool()){
@@ -184,7 +206,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		 return insteadBean;
 	}
 	
-	private PojoTxnsLog generateTxnsLog(InsteadPayOrderBean insteadPayOrderBean){
+	private PojoTxnsLog generateTxnsLog(InsteadPayOrderBean insteadPayOrderBean) throws InsteadPayOrderException{
 		MerchantBean member = merchService.getMerchBymemberId(insteadPayOrderBean.getMerId());
 		PojoTxnsLog txnsLog = new PojoTxnsLog();
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
@@ -250,7 +272,9 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		if(!resultBean.isResultBool()){
 			return resultBean;
 		}
+		//检查
 		commonOrderService.checkInsteadPayTime();
+		commonOrderService.verifyBusiness(BeanCopyUtil.copyBean(OrderBean.class, insteadPayOrderBean), BusiTypeEnum.insteadPay);
 		commonOrderService.validateBusiness(BeanCopyUtil.copyBean(OrderBean.class, insteadPayOrderBean));
 		commonOrderService.verifyMerchantAndCoopInsti(insteadPayOrderBean.getMerId(), insteadPayOrderBean.getCoopInstiId());
 		commonOrderService.checkBusiAcctOfInsteadPay(insteadPayOrderBean.getMerId(),insteadPayOrderBean.getTxnAmt());
@@ -272,7 +296,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
         }
         AccountTypeEnum  accType = AccountTypeEnum.fromValue(insteadPayOrderBean.getAccType());
         if(accType==null || accType.equals(AccountTypeEnum.UNKNOW)){
-        	throw  new InsteadPayOrderException("SE02");//代付账户类型错误
+        	throw  new InsteadPayOrderException("OD047");//代付账户类型错误
         }
         CertifTypeEnmu certype = CertifTypeEnmu.fromValue(insteadPayOrderBean.getCertifTp());
         if(certype==null || certype.equals(AccountTypeEnum.UNKNOW)){

@@ -22,6 +22,7 @@ import com.zlebank.zplatform.order.exception.WithdrawOrderException;
  * @date 2016年11月14日 下午3:26:08
  * @since 
  */
+@Deprecated
 public interface WithdrawOrderService {
 
 	/**

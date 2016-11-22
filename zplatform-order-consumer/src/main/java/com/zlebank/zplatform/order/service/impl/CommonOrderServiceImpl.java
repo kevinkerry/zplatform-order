@@ -247,6 +247,102 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         
         
 	}
+	
+	@Override
+	public void verifyBusiness(OrderBean orderBean,BusiTypeEnum busiType) throws CommonException {
+		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(orderBean.getTxnType(), orderBean.getTxnSubType(), orderBean.getBizType());
+        if(busiModel==null){
+        	throw new CommonException("OD045", "订单交易类型错误");
+        }
+        BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
+        //BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
+        if(!busiTypeEnum.getCode().equals(busiType.getCode())){
+        	throw new CommonException("OD045", "订单业务类型错误");
+        }
+        if(busiTypeEnum==BusiTypeEnum.consumption){//消费
+        	
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        		 throw new CommonException("OD004", "商户号为空");
+        	}
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
+        	if(member==null){
+        		throw new CommonException("OD009", "商户不存在");
+        	}
+        	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            if(prodCase==null){
+                throw new CommonException("OD005", "商户未开通此业务");
+            }
+            /*if(BusinessEnum.CONSUMEQUICK_PRODUCT==businessEnum){//产品消费业务
+            	FinanceProductQueryBean financeProductQueryBean = new FinanceProductQueryBean();
+            	financeProductQueryBean.setProductCode(orderBean.getProductcode());
+            	try {
+					FinanceProductAccountBean productAccountBean = financeProductAccountService.queryBalance(financeProductQueryBean, Usage.BASICPAY);
+					if(AcctStatusType.NORMAL!=AcctStatusType.fromValue(productAccountBean.getStatus())){
+						throw new CommonException("OD006", "产品异常，请联系客服");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw new CommonException("OD007", "产品不存在");
+				}
+            }*/
+        }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
+        	//个人充值
+        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+				throw new CommonException("OD008", "会员不存在无法进行充值");
+			}
+        	//商户充值
+        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		if(member==null){
+            		throw new CommonException("OD009", "商户不存在");
+            	}
+            	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            	 if(prodCase==null){
+                     throw new CommonException("OD005", "商户未开通此业务");
+                 }
+        	}
+        	
+        }else if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
+        	//个人提现
+        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+				throw new CommonException("OD008", "会员不存在无法进行充值");
+			}
+        	//商户提现
+        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        		if(member==null){
+            		throw new CommonException("OD009", "商户不存在");
+            	}
+            	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            	 if(prodCase==null){
+                     throw new CommonException("OD005", "商户未开通此业务");
+                 }
+        	}
+        }else if(busiTypeEnum==BusiTypeEnum.insteadPay){
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        		 throw new CommonException("OD004", "商户号为空");
+        	}
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	if(member==null){
+        		throw new CommonException("OD009", "商户不存在");
+        	}
+        	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            if(prodCase==null){
+                throw new CommonException("OD005", "商户未开通此业务");
+            }
+            
+        }else if(busiTypeEnum==BusiTypeEnum.refund){
+        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        		 throw new CommonException("OD004", "商户号为空");
+        	}
+        	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
+        	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
+            if(prodCase==null){
+                throw new CommonException("OD005", "商户未开通此业务");
+            }
+        }
+	}
 
 	/**
 	 *

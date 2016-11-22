@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 @Repository
 public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<PojoTxnsLog> implements TxnsLogDAO {
 
+	private static final Logger log = LoggerFactory.getLogger(TxnsLogDAOImpl.class);
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void saveTxnsLog(PojoTxnsLog txnsLog){
 		super.saveA(txnsLog);
@@ -92,6 +96,24 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<PojoTxnsLog> implements
 		Criteria criteria = getSession().createCriteria(PojoTxnsLog.class);
 		criteria.add(Restrictions.eq("txnseqno", txnseqno));
 		return (PojoTxnsLog) criteria.uniqueResult();
+	}
+
+	/**
+	 *
+	 * @param txnseqno
+	 * @param fee
+	 */
+	@Override
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
+	public void updateTradeFee(String txnseqno, long fee) {
+		// TODO Auto-generated method stub
+		String hql = "update PojoTxnsLog set txnfee=? where txnseqno = ?  ";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter(0, fee);
+		query.setParameter(1, txnseqno);
+		int rows = query.executeUpdate();
+		log.info("updateTradeFee sql :{},effect rows:{}", hql, rows);
 	}
 
 }

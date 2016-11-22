@@ -22,6 +22,7 @@ import com.zlebank.zplatform.order.exception.RefundOrderException;
  * @date 2016年11月11日 下午1:55:40
  * @since 
  */
+@Deprecated
 public interface RefundOrderService {
 
 	/**

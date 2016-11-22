@@ -33,7 +33,9 @@ public enum OrderTagsEnum {
 	/**退款订单**/
 	REFUND_SIMPLIFIED("TAG_006"),
 	/**提现订单*/
-	WITHDRAW_SIMPLIFIED("TAG_007");
+	WITHDRAW_SIMPLIFIED("TAG_007"),
+	/**充值订单*/
+	RECHARGE_SIMPLIFIED("TAG_008");
 	private String code;
 
 	/**

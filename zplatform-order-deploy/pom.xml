@@ -359,5 +359,6 @@
 		<module>../zplatform-order-consumer</module>
 		<module>../zplatform-order-producer</module>
 		<module>../zplatform-order-service</module>
+		<module>../zplatform-order-simple</module>
 	</modules>
 </project>

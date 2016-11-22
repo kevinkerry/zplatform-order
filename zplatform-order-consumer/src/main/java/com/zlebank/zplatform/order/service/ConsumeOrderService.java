@@ -21,6 +21,7 @@ import com.zlebank.zplatform.order.exception.CommonException;
  * @date 2016年9月8日 下午3:34:34
  * @since 
  */
+@Deprecated
 public interface ConsumeOrderService {
 
 	/**

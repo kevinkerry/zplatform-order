@@ -11,6 +11,7 @@
 package com.zlebank.zplatform.order.service;
 
 import com.zlebank.zplatform.commons.bean.CardBin;
+import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
 import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
@@ -55,7 +56,13 @@ public interface CommonOrderService {
 	 * @return
 	 */
     public void verifyBusiness(OrderBean orderBean) throws CommonException;
-    
+    /**
+	 * 校验业务类型
+	 * @param order
+	 * @param busiType 方法业务类型
+	 * @return
+	 */
+    public void verifyBusiness(OrderBean orderBean,BusiTypeEnum busiType) throws CommonException;
     /**
      * 校验商户和合作机构
      * @param merchant

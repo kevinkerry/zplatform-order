@@ -23,7 +23,7 @@ public class ValidateLocator{
 	private final static ResourceBundle RESOURCE = ResourceBundle.getBundle("order_exception");
 	private static Validator validator;
 	public static final String SYSTEM_ERROR="订单信息错误,请重新提交订单";
-    private static final Log logger = LogFactory.getLog(ValidateLocator.class);
+    //private static final Log logger = LogFactory.getLog(ValidateLocator.class);
 	public static<T> ResultBean validateBeans(T obj){
 	    ResultBean resultBean=null;
 		try {
@@ -40,7 +40,7 @@ public class ValidateLocator{
 			 }
 			 resultBean = new ResultBean(obj);
 		} catch (Exception e) {
-		    logger.error("ValidateLocator.validateBeans throws error", e);
+		   // logger.error("ValidateLocator.validateBeans throws error", e);
 		    //rDto.setErrorResultDto(SYSTEM_ERROR);
 		} 
 	     return resultBean;

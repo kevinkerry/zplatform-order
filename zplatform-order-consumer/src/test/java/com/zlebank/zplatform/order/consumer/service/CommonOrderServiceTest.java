@@ -33,7 +33,7 @@ import com.zlebank.zplatform.order.service.ConsumeOrderService;
  * @since 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/*.xml")
+@ContextConfiguration("/ContextTest.xml")
 public class CommonOrderServiceTest {
 
 	@Autowired
