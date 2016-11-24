@@ -12,12 +12,10 @@ package com.zlebank.zplatform.order.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.rpc.RpcException;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiProductService;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberBean;
@@ -133,7 +131,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 				.getMerId());
 		orderinfo.setSecmemberno(orderBean.getMerId());
 		orderinfo
-				.setSecmembername(StringUtil.isNotEmpty(orderBean.getMerName()) ? orderBean
+				.setSecmembername(StringUtils.isNotEmpty(orderBean.getMerName()) ? orderBean
 						.getMerName() : merchant.getAccName());
 		orderinfo.setSecmembershortname(orderBean.getMerAbbr());
 		orderinfo.setPayerip(orderBean.getCustomerIp());
@@ -164,7 +162,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(
 				orderBean.getTxnType(), orderBean.getTxnSubType(),
 				orderBean.getBizType());
-		if (StringUtil.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
+		if (StringUtils.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
 			member = merchService.getMerchBymemberId(orderBean.getMerId());
 
 			txnsLog.setRiskver(member.getRiskVer());
@@ -208,7 +206,7 @@ public class ConsumeOrderServiceImpl implements ConsumeOrderService {
 		txnsLog.setAccordcommitime(DateUtil.getCurrentDateTime());
 		txnsLog.setTradestatflag(TradeStatFlagEnum.INITIAL.getStatus());// 交易初始状态
 		// txnsLog.setTradcomm(GateWayTradeAnalyzer.generateCommAmt(order.getReserved()));
-		if (StringUtil.isNotEmpty(orderBean.getMemberId())) {
+		if (StringUtils.isNotEmpty(orderBean.getMemberId())) {
 			if ("999999999999999".equals(orderBean.getMemberId())) {
 				txnsLog.setAccmemberid("999999999999999");// 匿名会员号
 			} else {

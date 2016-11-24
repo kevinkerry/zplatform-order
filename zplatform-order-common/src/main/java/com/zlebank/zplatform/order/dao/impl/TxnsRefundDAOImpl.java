@@ -13,14 +13,13 @@ package com.zlebank.zplatform.order.dao.impl;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
+import com.zlebank.zplatform.order.common.dao.impl.HibernateBaseDAOImpl;
 import com.zlebank.zplatform.order.dao.TxnsRefundDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsRefund;
 
@@ -55,7 +54,7 @@ public class TxnsRefundDAOImpl extends HibernateBaseDAOImpl<PojoTxnsRefund> impl
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void saveRefundOrder(PojoTxnsRefund txnsRefund) {
 		// TODO Auto-generated method stub
-		saveA(txnsRefund);
+		saveEntity(txnsRefund);
 	}
 
 }

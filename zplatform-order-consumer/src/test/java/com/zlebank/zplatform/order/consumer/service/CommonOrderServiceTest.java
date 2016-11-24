@@ -18,11 +18,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.alibaba.fastjson.JSON;
-import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.ConsumeOrderService;
+import com.zlebank.zplatform.order.utils.DateUtil;
 
 /**
  * Class Description

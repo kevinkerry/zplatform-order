@@ -13,11 +13,7 @@ package com.zlebank.zplatform.order.service.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.fee.bean.FeeBean;
 import com.zlebank.zplatform.fee.exception.TradeFeeException;
 import com.zlebank.zplatform.fee.service.TradeFeeService;
@@ -35,12 +31,14 @@ import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsRefund;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.enums.BusinessEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
 import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.RefundOrderService;
+import com.zlebank.zplatform.order.utils.BeanCopyUtil;
 import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.order.utils.DateUtil;
 import com.zlebank.zplatform.risk.bean.RiskBean;
@@ -145,7 +143,7 @@ public class RefundOrderServiceImpl implements RefundOrderService {
 		}
 		
 		txnsLog = new PojoTxnsLog();
-		if (StringUtil.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
+		if (StringUtils.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
 			member = merchService.getMerchBymemberId(orderBean.getMerId());
 			txnsLog.setRiskver(member.getRiskVer());
 			txnsLog.setSplitver(member.getSpiltVer());

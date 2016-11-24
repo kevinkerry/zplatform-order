@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.service.consume;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
@@ -38,6 +37,7 @@ import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.exception.OrderException;
 import com.zlebank.zplatform.order.service.CheckOfServcie;
 import com.zlebank.zplatform.order.service.OrderService;
@@ -142,7 +142,7 @@ public abstract class AbstractConsumeOrderService implements CheckOfServcie<Cons
         }
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
         if(busiTypeEnum==BusiTypeEnum.consumption){//消费
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new OrderException("OD004");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
@@ -187,7 +187,7 @@ public abstract class AbstractConsumeOrderService implements CheckOfServcie<Cons
 	 */
 	@Override
 	public void checkOfBusiAcct(ConsumeOrderBean orderBean) throws OrderException{
-		if (!ANONMEMBERID.equals(orderBean.getMemberId())&&StringUtil.isNotEmpty(orderBean.getMemberId())) {
+		if (!ANONMEMBERID.equals(orderBean.getMemberId())&&StringUtils.isNotEmpty(orderBean.getMemberId())) {
 			MemberBean member = new MemberBean();
 			member.setMemberId(orderBean.getMemberId());
 			MemberAccountBean memberAccountBean = null;
@@ -206,7 +206,7 @@ public abstract class AbstractConsumeOrderService implements CheckOfServcie<Cons
 				throw new OrderException("OD049", "会员账户状态异常");
 			}
 		}
-		if(StringUtil.isEmpty(orderBean.getMerId())){
+		if(StringUtils.isEmpty(orderBean.getMerId())){
 			return ;
 		}
 		MemberBean member = new MemberBean();

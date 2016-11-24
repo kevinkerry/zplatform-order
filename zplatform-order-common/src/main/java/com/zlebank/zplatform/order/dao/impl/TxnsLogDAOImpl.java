@@ -25,8 +25,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
+import com.zlebank.zplatform.order.common.bean.CardBin;
+import com.zlebank.zplatform.order.common.dao.impl.HibernateBaseDAOImpl;
 import com.zlebank.zplatform.order.dao.TxnsLogDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 
@@ -44,7 +44,7 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<PojoTxnsLog> implements
 	private static final Logger log = LoggerFactory.getLogger(TxnsLogDAOImpl.class);
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void saveTxnsLog(PojoTxnsLog txnsLog){
-		super.saveA(txnsLog);
+		super.saveEntity(txnsLog);
 	}
 	
 	@Override

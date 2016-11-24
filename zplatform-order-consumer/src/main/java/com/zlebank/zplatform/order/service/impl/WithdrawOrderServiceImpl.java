@@ -10,14 +10,11 @@
  */
 package com.zlebank.zplatform.order.service.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
-import com.zlebank.zplatform.commons.utils.DateUtil;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.fee.bean.FeeBean;
 import com.zlebank.zplatform.fee.exception.TradeFeeException;
 import com.zlebank.zplatform.fee.service.TradeFeeService;
@@ -38,12 +35,15 @@ import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsWithdraw;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.WithdrawOrderException;
 import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.WithdrawOrderService;
+import com.zlebank.zplatform.order.utils.BeanCopyUtil;
 import com.zlebank.zplatform.order.utils.Constant;
+import com.zlebank.zplatform.order.utils.DateUtil;
 import com.zlebank.zplatform.risk.bean.RiskBean;
 import com.zlebank.zplatform.risk.exception.TradeRiskException;
 import com.zlebank.zplatform.risk.service.TradeRiskControlService;
@@ -96,7 +96,7 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 	@Override
 	public String createIndividualWithdrawOrder(WithdrawBean withdrawBean) throws WithdrawOrderException, CommonException {
 		WithdrawAccBean accBean = null;
-		if (StringUtil.isNotEmpty(withdrawBean.getBindId())) {// 使用已绑定的卡进行提现
+		if (StringUtils.isNotEmpty(withdrawBean.getBindId())) {// 使用已绑定的卡进行提现
 			QuickpayCustBean custCard = memberBankCardService.getMemberBankCardById(Long.valueOf(withdrawBean.getBindId()));
 			if (custCard == null) {
 				throw new WithdrawOrderException("OD039");
@@ -146,7 +146,7 @@ public class WithdrawOrderServiceImpl implements WithdrawOrderService {
 				withdrawBean.getBizType());
 		// member = memberService.get(withdrawBean.getCoopInstiId());
 		txnsLog = new PojoTxnsLog();
-		if (StringUtil.isNotEmpty(withdrawBean.getMerId())) {// 商户为空时，取商户的各个版本信息
+		if (StringUtils.isNotEmpty(withdrawBean.getMerId())) {// 商户为空时，取商户的各个版本信息
 			MerchantBean member = merchService.getMerchBymemberId(withdrawBean
 					.getMerId());
 			txnsLog.setRiskver(member.getRiskVer());

@@ -19,11 +19,11 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.zlebank.zplatform</groupId>
 			<artifactId>zplatform-commons</artifactId>
 			<version>1.4.0</version>
-		</dependency>
+		</dependency> -->
 		<!-- <dependency> <groupId>com.zlebank.zplatform</groupId> <artifactId>zplatform-remote-client</artifactId> 
 			<version>1.0.0-SNAPSHOT</version> </dependency> -->
 		<dependency>
@@ -121,6 +121,13 @@
 			<groupId>com.zlebank.zplatform</groupId>
 			<artifactId>zplatform-member-individual-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>zplatform-member-commons</artifactId>
+					<groupId>com.zlebank.zplatform</groupId>
+				</exclusion>
+				
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.zlebank.zplatform</groupId>
@@ -131,6 +138,12 @@
 			<groupId>com.zlebank.zplatform</groupId>
 			<artifactId>zplatform-member-merchant-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>zplatform-acc-bean</artifactId>
+					<groupId>com.zlebank.zplatform</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 

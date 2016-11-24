@@ -10,8 +10,6 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
-import com.zlebank.zplatform.commons.utils.DateUtil;
-
 /**
  * TTxnsRefund entity. @author MyEclipse Persistence Tools
  */

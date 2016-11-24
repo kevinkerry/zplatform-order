@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
+import com.zlebank.zplatform.order.common.dao.impl.HibernateBaseDAOImpl;
 import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
 
@@ -38,7 +38,7 @@ public class TxnsOrderinfoDAOImpl extends HibernateBaseDAOImpl<PojoTxnsOrderinfo
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void saveOrderInfo(PojoTxnsOrderinfo orderinfo) {
 		// TODO Auto-generated method stub
-		super.saveA(orderinfo);
+		super.saveEntity(orderinfo);
 	}
 
 	/**

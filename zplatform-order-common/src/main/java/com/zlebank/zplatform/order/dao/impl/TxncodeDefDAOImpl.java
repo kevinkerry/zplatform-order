@@ -15,7 +15,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
+import com.zlebank.zplatform.order.common.dao.impl.HibernateBaseDAOImpl;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 

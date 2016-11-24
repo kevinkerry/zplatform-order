@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
@@ -45,9 +43,8 @@ import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
-import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.exception.OrderException;
-import com.zlebank.zplatform.order.exception.RefundOrderException;
 import com.zlebank.zplatform.order.refund.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.service.CheckOfServcie;
 import com.zlebank.zplatform.order.service.OrderService;
@@ -164,7 +161,7 @@ public abstract class AbstractRefundOrderService implements OrderService,CheckOf
         }
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
         if(busiTypeEnum==BusiTypeEnum.refund){
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new OrderException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());

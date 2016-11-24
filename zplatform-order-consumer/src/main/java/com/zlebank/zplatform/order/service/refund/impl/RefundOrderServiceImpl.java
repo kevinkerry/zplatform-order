@@ -15,7 +15,6 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.fee.bean.FeeBean;
 import com.zlebank.zplatform.fee.exception.TradeFeeException;
 import com.zlebank.zplatform.fee.service.TradeFeeService;
@@ -154,7 +153,7 @@ public class RefundOrderServiceImpl extends AbstractRefundOrderService implement
 		old_txnsLog = txnsLogDAO.getTxnsLogByTxnseqno(old_orderInfo.getRelatetradetxn());
 		PojoTxncodeDef busiModel = txncodeDefDAO.getBusiCode(orderBean.getTxnType(), orderBean.getTxnSubType(),orderBean.getBizType());
 		txnsLog = new PojoTxnsLog();
-		if (StringUtil.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
+		if (StringUtils.isNotEmpty(orderBean.getMerId())) {// 商户为空时，取商户的各个版本信息
 			member = merchService.getMerchBymemberId(orderBean.getMerId());
 			txnsLog.setRiskver(member.getRiskVer());
 			txnsLog.setSplitver(member.getSpiltVer());

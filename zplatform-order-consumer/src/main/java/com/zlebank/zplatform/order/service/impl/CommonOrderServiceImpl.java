@@ -24,10 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
@@ -43,6 +39,7 @@ import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.OrderInfoBean;
 import com.zlebank.zplatform.order.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.bean.WithdrawBean;
+import com.zlebank.zplatform.order.common.bean.CardBin;
 import com.zlebank.zplatform.order.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
@@ -54,12 +51,14 @@ import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.enums.BusinessEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
 import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.exception.RefundOrderException;
 import com.zlebank.zplatform.order.exception.WithdrawOrderException;
 import com.zlebank.zplatform.order.service.CommonOrderService;
+import com.zlebank.zplatform.order.utils.BeanCopyUtil;
 import com.zlebank.zplatform.order.utils.Constant;
 import com.zlebank.zplatform.order.utils.DateUtil;
 
@@ -163,7 +162,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
         if(busiTypeEnum==BusiTypeEnum.consumption){//消费
         	BusinessEnum businessEnum = BusinessEnum.fromValue(busiModel.getBusicode());
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
@@ -190,11 +189,11 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             }*/
         }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
         	//个人充值
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
         	//商户充值
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new CommonException("OD009", "商户不存在");
@@ -207,11 +206,11 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         	
         }else if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
         	//个人提现
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
         	//商户提现
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new CommonException("OD009", "商户不存在");
@@ -222,7 +221,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
                  }
         	}
         }else if(busiTypeEnum==BusiTypeEnum.insteadPay){
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
@@ -235,7 +234,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             }
             
         }else if(busiTypeEnum==BusiTypeEnum.refund){
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
@@ -261,7 +260,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         }
         if(busiTypeEnum==BusiTypeEnum.consumption){//消费
         	
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());//memberService.getMemberByMemberId(order.getMerId());.java
@@ -288,11 +287,11 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             }*/
         }else if(busiTypeEnum==BusiTypeEnum.charge){//充值
         	//个人充值
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
         	//商户充值
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new CommonException("OD009", "商户不存在");
@@ -305,11 +304,11 @@ public class CommonOrderServiceImpl implements CommonOrderService{
         	
         }else if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
         	//个人提现
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD008", "会员不存在无法进行充值");
 			}
         	//商户提现
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new CommonException("OD009", "商户不存在");
@@ -320,7 +319,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
                  }
         	}
         }else if(busiTypeEnum==BusiTypeEnum.insteadPay){
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
@@ -333,7 +332,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             }
             
         }else if(busiTypeEnum==BusiTypeEnum.refund){
-        	if(StringUtil.isEmpty(orderBean.getMerId())){
+        	if(StringUtils.isEmpty(orderBean.getMerId())){
         		 throw new CommonException("OD004", "商户号为空");
         	}
         	MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
@@ -355,7 +354,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 			throws CommonException {
 		// TODO Auto-generated method stub
 		// 检验一级商户和二级商户有效性
-        if (StringUtil.isNotEmpty(merchant)) {
+        if (StringUtils.isNotEmpty(merchant)) {
             MerchantBean subMember = merchService.getMerchBymemberId(merchant);
             if (subMember == null) {
             	throw new CommonException("OD009", "商户不存在");
@@ -384,7 +383,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 		
 		
 		if ("2000".equals(busiModel.getBusitype())) {
-			if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+			if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new CommonException("OD011", "会员不存在无法进行充值");
 			}
 		}
@@ -399,7 +398,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 	@Override
 	public void checkBusiAcct(String merchant, String memberId)
 			throws CommonException {
-		if (!"999999999999999".equals(memberId)&&StringUtil.isNotEmpty(memberId)) {
+		if (!"999999999999999".equals(memberId)&&StringUtils.isNotEmpty(memberId)) {
 			MemberBean member = new MemberBean();
 			member.setMemberId(memberId);
 			MemberAccountBean memberAccountBean = null;
@@ -418,7 +417,7 @@ public class CommonOrderServiceImpl implements CommonOrderService{
 				throw new CommonException("GW19", "会员账户状态异常");
 			}
 		}
-		if(StringUtil.isEmpty(merchant)){
+		if(StringUtils.isEmpty(merchant)){
 			return ;
 		}
 		MemberBean member = new MemberBean();
@@ -571,9 +570,9 @@ public class CommonOrderServiceImpl implements CommonOrderService{
             String startTime = Constant.getInstance().getInstead_pay_realtime_start_time();
                    
             String endTime = Constant.getInstance().getInstead_pay_realtime_end_time();
-            currentTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
-            Date insteadStartTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentDate()+startTime,"HHmmss");
-            Date insteadEndTime = com.zlebank.zplatform.commons.utils.DateUtil.convertToDate(DateUtil.getCurrentDate()+endTime,"HHmmss");
+            currentTime = DateUtil.convertToDate(DateUtil.getCurrentTime(),"HHmmss");
+            Date insteadStartTime =DateUtil.convertToDate(DateUtil.getCurrentDate()+startTime,"HHmmss");
+            Date insteadEndTime =DateUtil.convertToDate(DateUtil.getCurrentDate()+endTime,"HHmmss");
             if (currentTime.before(insteadEndTime)
                    && currentTime.after(insteadStartTime)) {
             	throw new InsteadPayOrderException("OD021");//非交易时间

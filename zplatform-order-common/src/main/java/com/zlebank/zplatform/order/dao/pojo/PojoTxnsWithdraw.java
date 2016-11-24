@@ -9,9 +9,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.zlebank.zplatform.commons.utils.DateUtil;
 import com.zlebank.zplatform.order.bean.WithdrawAccBean;
 import com.zlebank.zplatform.order.bean.WithdrawBean;
+import com.zlebank.zplatform.order.utils.DateUtil;
 import com.zlebank.zplatform.order.withdraw.bean.WithdrawOrderBean;
 
 /**

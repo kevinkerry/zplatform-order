@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zlebank.zplatform.commons.dao.impl.HibernateBaseDAOImpl;
+import com.zlebank.zplatform.order.common.dao.impl.HibernateBaseDAOImpl;
 import com.zlebank.zplatform.order.dao.TxnsWithdrawDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsWithdraw;
 
@@ -38,7 +38,7 @@ public class TxnsWithdrawDAOImpl extends HibernateBaseDAOImpl<PojoTxnsWithdraw> 
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void saveTxnsWithdraw(PojoTxnsWithdraw txnsWithdraw) {
 		// TODO Auto-generated method stub
-		saveA(txnsWithdraw);
+		saveEntity(txnsWithdraw);
 	}
 
 	

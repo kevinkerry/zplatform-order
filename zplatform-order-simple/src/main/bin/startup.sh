@@ -65,7 +65,8 @@ while [ $COUNT -lt 1 ]; do
     sleep 1  
     if [ -n "$SERVER_PORT" ]; then
 	if [ "$SERVER_PROTOCOL" == "dubbo" ]; then
-	    COUNT=`echo status | nc -i 1 127.0.0.1 $SERVER_PORT | grep -c OK`
+	    #COUNT=`echo status | nc -i 1 127.0.0.1 $SERVER_PORT | grep -c OK`
+	    COUNT=`netstat -an | grep $SERVER_PORT | wc -l`
 	else
 	    COUNT=`netstat -an | grep $SERVER_PORT | wc -l`
 	fi

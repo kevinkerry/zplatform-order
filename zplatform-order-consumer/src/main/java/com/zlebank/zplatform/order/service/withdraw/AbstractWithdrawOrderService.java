@@ -12,19 +12,15 @@ package com.zlebank.zplatform.order.service.withdraw;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.StringUtil;
-import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
 import com.zlebank.zplatform.member.individual.bean.MemberBean;
-import com.zlebank.zplatform.member.individual.bean.PoMemberBean;
 import com.zlebank.zplatform.member.individual.bean.enums.MemberType;
 import com.zlebank.zplatform.member.individual.service.MemberAccountService;
 import com.zlebank.zplatform.member.individual.service.MemberService;
@@ -34,19 +30,15 @@ import com.zlebank.zplatform.order.bean.BaseOrderBean;
 import com.zlebank.zplatform.order.bean.ResultBean;
 import com.zlebank.zplatform.order.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
-import com.zlebank.zplatform.order.dao.TxnsLogDAO;
 import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
-import com.zlebank.zplatform.order.dao.TxnsRefundDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
-import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.enums.AcctStatusType;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.exception.OrderException;
-import com.zlebank.zplatform.order.exception.WithdrawOrderException;
-import com.zlebank.zplatform.order.refund.bean.RefundOrderBean;
 import com.zlebank.zplatform.order.service.CheckOfServcie;
 import com.zlebank.zplatform.order.service.OrderService;
-import com.zlebank.zplatform.order.service.refund.AbstractRefundOrderService;
 import com.zlebank.zplatform.order.utils.ValidateLocator;
 import com.zlebank.zplatform.order.withdraw.bean.WithdrawOrderBean;
 import com.zlebank.zplatform.risk.exception.TradeRiskException;
@@ -154,11 +146,11 @@ public abstract class AbstractWithdrawOrderService implements OrderService,Check
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
         if(busiTypeEnum==BusiTypeEnum.withdrawal){//提现
         	//个人提现
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new OrderException("OD008");
 			}
         	//商户提现
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new OrderException("OD009");

@@ -841,7 +841,17 @@ public class DateUtil {
 	public static String getSettleDate(int cycle){
         return formatDateTime(SIMPLE_DATE_FROMAT, skipDateTime(new Date(),cycle));
 	}
-
+	/**
+     * 根据日期字符串返回相应的DATE类型
+     * @param yyyymmdd
+     * @return Date
+     * @throws ParseException 
+     */
+    public static Date convertToDate(String strDate, String format) throws ParseException {
+        SimpleDateFormat sf = new SimpleDateFormat(format);
+        return sf.parse(strDate);
+    }
+    
 	public static void main(String[] args) {
 	    
 		System.out.println(getSettleDate(2));

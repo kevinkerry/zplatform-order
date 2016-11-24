@@ -10,6 +10,7 @@
  */
 package com.zlebank.zplatform.order.service.recharge;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.zlebank.zplatform.acc.bean.enums.AcctStatusType;
 import com.zlebank.zplatform.acc.bean.enums.Usage;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.member.coopinsti.bean.CoopInsti;
 import com.zlebank.zplatform.member.coopinsti.service.CoopInstiService;
 import com.zlebank.zplatform.member.individual.bean.MemberAccountBean;
@@ -31,14 +30,13 @@ import com.zlebank.zplatform.member.merchant.bean.MerchantBean;
 import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.BaseOrderBean;
 import com.zlebank.zplatform.order.bean.ResultBean;
-import com.zlebank.zplatform.order.consume.bean.ConsumeOrderBean;
 import com.zlebank.zplatform.order.dao.ProdCaseDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
 import com.zlebank.zplatform.order.dao.TxnsOrderinfoDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoProdCase;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsOrderinfo;
-import com.zlebank.zplatform.order.exception.CommonException;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.exception.OrderException;
 import com.zlebank.zplatform.order.recharge.bean.RechargeOrderBean;
 import com.zlebank.zplatform.order.service.CheckOfServcie;
@@ -146,19 +144,19 @@ public abstract class AbstractRechargeOrderService implements OrderService,Check
         BusiTypeEnum busiTypeEnum = BusiTypeEnum.fromValue(busiModel.getBusitype());
         if(busiTypeEnum==BusiTypeEnum.charge){//充值
         	//个人充值
-        	if (StringUtil.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
+        	if (StringUtils.isEmpty(orderBean.getMemberId()) || "999999999999999".equals(orderBean.getMemberId())) {
 				throw new OrderException("OD008");
 			}
         	//商户充值
-        	if (StringUtil.isNotEmpty(orderBean.getMerId())){
+        	if (StringUtils.isNotEmpty(orderBean.getMerId())){
         		MerchantBean member = merchService.getMerchBymemberId(orderBean.getMerId());
         		if(member==null){
             		throw new OrderException("OD009");
             	}
             	PojoProdCase prodCase= prodCaseDAO.getMerchProd(member.getPrdtVer(),busiModel.getBusicode());
-            	 if(prodCase==null){
-                     throw new OrderException("OD005");
-                 }
+            	if(prodCase==null){
+                    throw new OrderException("OD005");
+                }
         	}
         }else{
             throw new OrderException("OD045");
@@ -194,25 +192,22 @@ public abstract class AbstractRechargeOrderService implements OrderService,Check
 	 */
 	@Override
 	public void checkOfBusiAcct(RechargeOrderBean orderBean) throws OrderException{
-		if (!ANONMEMBERID.equals(orderBean.getMemberId())&&StringUtil.isNotEmpty(orderBean.getMemberId())) {
+		if (!ANONMEMBERID.equals(orderBean.getMemberId())&&StringUtils.isNotEmpty(orderBean.getMemberId())) {
 			MemberBean member = new MemberBean();
 			member.setMemberId(orderBean.getMemberId());
 			MemberAccountBean memberAccountBean = null;
 			try {
 				memberAccountBean = memberAccountService.queryBalance(MemberType.INDIVIDUAL, member, Usage.BASICPAY);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				logger.error(e.getMessage());
 				throw new OrderException("OD049", "账户查询异常:"+e.getMessage());
 			}
-			
 			if (AcctStatusType.fromValue(memberAccountBean.getStatus()) == AcctStatusType.FREEZE||AcctStatusType.fromValue(memberAccountBean.getStatus())== AcctStatusType.STOP_IN) {
-				//throw new TradeException("GW19");
 				throw new OrderException("OD049", "会员账户状态异常");
 			}
 		}
-		if(StringUtil.isEmpty(orderBean.getMerId())){
+		if(StringUtils.isEmpty(orderBean.getMerId())){
 			return ;
 		}
 		MemberBean member = new MemberBean();

@@ -18,11 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.zlebank.zplatform.commons.bean.CardBin;
-import com.zlebank.zplatform.commons.dao.pojo.BusiTypeEnum;
-import com.zlebank.zplatform.commons.utils.BeanCopyUtil;
-import com.zlebank.zplatform.commons.utils.DateUtil;
-import com.zlebank.zplatform.commons.utils.StringUtil;
 import com.zlebank.zplatform.fee.bean.FeeBean;
 import com.zlebank.zplatform.fee.exception.TradeFeeException;
 import com.zlebank.zplatform.fee.service.TradeFeeService;
@@ -37,6 +32,7 @@ import com.zlebank.zplatform.member.merchant.service.MerchService;
 import com.zlebank.zplatform.order.bean.InsteadPayOrderBean;
 import com.zlebank.zplatform.order.bean.OrderBean;
 import com.zlebank.zplatform.order.bean.ResultBean;
+import com.zlebank.zplatform.order.common.bean.CardBin;
 import com.zlebank.zplatform.order.consumer.enums.TradeStatFlagEnum;
 import com.zlebank.zplatform.order.dao.InsteadPayRealtimeDAO;
 import com.zlebank.zplatform.order.dao.TxncodeDefDAO;
@@ -45,6 +41,7 @@ import com.zlebank.zplatform.order.dao.pojo.PojoInsteadPayRealtime;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxncodeDef;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsLog;
 import com.zlebank.zplatform.order.enums.AccountTypeEnum;
+import com.zlebank.zplatform.order.enums.BusiTypeEnum;
 import com.zlebank.zplatform.order.enums.CertifTypeEnmu;
 import com.zlebank.zplatform.order.enums.CurrencyEnum;
 import com.zlebank.zplatform.order.exception.CommonException;
@@ -52,7 +49,9 @@ import com.zlebank.zplatform.order.exception.InsteadPayOrderException;
 import com.zlebank.zplatform.order.sequence.SerialNumberService;
 import com.zlebank.zplatform.order.service.CommonOrderService;
 import com.zlebank.zplatform.order.service.InsteadPayOrderService;
+import com.zlebank.zplatform.order.utils.BeanCopyUtil;
 import com.zlebank.zplatform.order.utils.Constant;
+import com.zlebank.zplatform.order.utils.DateUtil;
 import com.zlebank.zplatform.order.utils.ValidateLocator;
 import com.zlebank.zplatform.trade.acc.service.InsteadPayAccountingService;
 
@@ -193,7 +192,7 @@ public class InsteadPayOrderServiceImpl implements InsteadPayOrderService {
 		 insteadBean.setCoopInstCode(insteadPayOrderBean.getCoopInstiId());
 		 insteadBean.setCreateTime(new Date());
 		 String enterpriseName="";
-		if(StringUtil.isNotEmpty(insteadPayOrderBean.getMerId())){
+		if(StringUtils.isNotEmpty(insteadPayOrderBean.getMerId())){
 			 EnterpriseBean enter= enterpriseService.getEnterpriseByMemberId(insteadPayOrderBean.getMerId());
 			 enterpriseName=enter.getEnterpriseName();
 		}

@@ -10,7 +10,7 @@
  */
 package com.zlebank.zplatform.order.dao;
 
-import com.zlebank.zplatform.commons.dao.BaseDAO;
+import com.zlebank.zplatform.order.common.dao.BaseDAO;
 import com.zlebank.zplatform.order.dao.pojo.PojoTxnsRefund;
 
 /**

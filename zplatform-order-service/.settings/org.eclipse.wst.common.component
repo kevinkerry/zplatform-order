@@ -13,16 +13,10 @@
         <dependent-module archiveName="zplatform-order-common-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-order-common/zplatform-order-common">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="zplatform-commons-1.4.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-commons/zplatform-commons">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="zplatform-member-individual-api-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-member-individual-api/zplatform-member-individual-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="zplatform-member-commons-api-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-member-commons-api/zplatform-member-commons-api">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="zplatform-member-commons-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-member-commons/zplatform-member-commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="zplatform-member-coopinsti-api-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/zplatform-member-coopinsti-api/zplatform-member-coopinsti-api">
